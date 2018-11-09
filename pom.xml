@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.hops</groupId>
   <artifactId>hopsworks-cli</artifactId>
-  <version>0.1</version>
+  <version>0.0.1</version>
   <packaging>jar</packaging>
 
   <name>hopsworks-cli</name>
@@ -14,8 +14,9 @@
   <scm>
     <connection>scm:git:git@github.com:hopshadoop/hopsworks-cli.git</connection>
     <developerConnection>scm:git:ssh://github.com:hopshadoop/hopsworks-cli.git</developerConnection>
-    <url>https://github.com/hopshadoop/hopsworks-cli</url>
+    <url>https://github.com/hopshadoop/hopsworks-cli/tree/master</url>
   </scm>
+
   <developers>
     <developer>
       <name>Jim Dowling</name>
