@@ -1,3 +1,5 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cz.jirutka.rsql/rsql-parser/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.hops/hopsworks-cli)
+
 # Hopsworks CLI
 
 A command-line client, written in Java, that uses the Hopsworks REST API for Job execution and file uploading.
