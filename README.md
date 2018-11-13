@@ -4,6 +4,15 @@
 
 A command-line client, written in Java, that uses the Hopsworks REST API for Job execution and file uploading.
 
+## Maven dependency
+
+<dependency>
+  <groupId>io.hops</groupId>
+  <artifactId>hopsworks-cli</artifactId>
+  <version>0.1</version>
+</dependency>
+
+
 ## Configuration
 
 You can either edit the conf/hops.properties file or set environment variables:
