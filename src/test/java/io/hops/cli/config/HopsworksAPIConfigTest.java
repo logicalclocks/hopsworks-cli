@@ -9,7 +9,8 @@ public class HopsworksAPIConfigTest {
 
     @Test
     public void getPathTest() {
-        HopsworksAPIConfig config = new HopsworksAPIConfig("admin@kth.se", "admin","http://bbc6.sics.se:8080/hopsworks-api/api", "test");
+        HopsworksAPIConfig config = new HopsworksAPIConfig("admin@kth.se", "admin",
+          "http://bbc3.sics.se:21756/hopsworks-api/api", "demo_spark_admin000");
         assertEquals("should return the the path",config.getPath(),"/hopsworks-api/api");
 
     }

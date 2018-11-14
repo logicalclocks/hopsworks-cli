@@ -1,5 +1,7 @@
 package io.hops.cli.action;
 
+import java.io.IOException;
+
 public class CreateDataSetAction implements IHopsworksAction {
 
 
@@ -9,7 +11,7 @@ public class CreateDataSetAction implements IHopsworksAction {
     }
 
     @Override
-    public void execute() throws Exception {
+    public int execute() throws IOException {
 
         //TODO
         throw new java.lang.UnsupportedOperationException("Not supported yet.");

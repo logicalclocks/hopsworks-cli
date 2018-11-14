@@ -18,7 +18,7 @@ public class HopsworksAuthTest {
     @Before
     public void setUp(){
 
-        String url = "http://bbc6.sics.se:8080/hopsworks-api/api";  //test server
+        String url = "http://bbc3.sics.se:21756/hopsworks-api/api";  //test server
         String anAccount = "admin@kth.se";
         String k3y = "admin";
         String projectName = "test";

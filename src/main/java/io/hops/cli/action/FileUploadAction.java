@@ -2,6 +2,8 @@ package io.hops.cli.action;
 
 import io.hops.cli.config.HopsworksAPIConfig;
 import io.hops.upload.net.HTTPFileUpload;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpStatus;
@@ -71,7 +73,7 @@ public class FileUploadAction implements IHopsworksAction {
 //  }
 
   @Override
-  public void execute() throws Exception {
+  public int execute() throws Exception {
 
     int statusCode;
 //    String completeUploadPath = generateUploadPath();
@@ -84,6 +86,7 @@ public class FileUploadAction implements IHopsworksAction {
     if (statusCode != HttpStatus.SC_OK) {
       throw new Exception("HTTP File Upload not successful");
     }
+    return statusCode;
 
   }
 }

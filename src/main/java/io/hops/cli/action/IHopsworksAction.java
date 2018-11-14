@@ -1,6 +1,12 @@
 package io.hops.cli.action;
 
-public interface IHopsworksAction {
+import java.io.IOException;
 
-    void execute() throws Exception;
+public interface IHopsworksAction {
+    
+    /**
+     * Send http request.
+     * @return http status code.
+     */
+    int execute() throws Exception;
 }
