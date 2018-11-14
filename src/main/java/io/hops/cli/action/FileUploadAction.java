@@ -2,11 +2,12 @@ package io.hops.cli.action;
 
 import io.hops.cli.config.HopsworksAPIConfig;
 import io.hops.upload.net.HTTPFileUpload;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpStatus;
 
-public class FileUploadAction implements IHopsworksAction {
+public class FileUploadAction extends HopsworksAction {
 
   private HopsworksAPIConfig hopsworksAPIConfig;
   private String hopsworksFolder;
@@ -14,26 +15,30 @@ public class FileUploadAction implements IHopsworksAction {
   private String targetFileName = null;
 
   private HTTPFileUpload httpFileUpload = null;
-
-
-  public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder,
-      URI filePath, String targetFileName) {
-
-    this.targetFileName = targetFileName; //optional parameter
-    this.init(hopsworksAPIConfig, hopsworksFolder, filePath);
-
+  
+  public FileUploadAction(String apiEndpoint, int port, boolean authentication, String path) {
+    super(apiEndpoint, port, authentication, path);
   }
-
-  public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder, String filePath) throws URISyntaxException {
-    this.init(hopsworksAPIConfig, hopsworksFolder, filePath);
-
-  }
-
-  public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder, URI filePath) {
-
-    this.init(hopsworksAPIConfig, hopsworksFolder, filePath);
-
-  }
+  
+  
+  //  public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder,
+//      URI filePath, String targetFileName) {
+//
+//    this.targetFileName = targetFileName; //optional parameter
+//    this.init(hopsworksAPIConfig, hopsworksFolder, filePath);
+//
+//  }
+//
+//  public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder, String filePath) throws URISyntaxException {
+//    this.init(hopsworksAPIConfig, hopsworksFolder, filePath);
+//
+//  }
+//
+//  public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder, URI filePath) {
+//
+//    this.init(hopsworksAPIConfig, hopsworksFolder, filePath);
+//
+//  }
 
   private void init(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder,
       String filePath) throws URISyntaxException {
@@ -71,7 +76,7 @@ public class FileUploadAction implements IHopsworksAction {
 //  }
 
   @Override
-  public void execute() throws Exception {
+  public int execute() throws Exception {
 
     int statusCode;
 //    String completeUploadPath = generateUploadPath();
@@ -84,6 +89,7 @@ public class FileUploadAction implements IHopsworksAction {
     if (statusCode != HttpStatus.SC_OK) {
       throw new Exception("HTTP File Upload not successful");
     }
+    return statusCode;
 
   }
 }

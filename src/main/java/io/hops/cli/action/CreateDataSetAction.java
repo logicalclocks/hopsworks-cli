@@ -1,15 +1,15 @@
 package io.hops.cli.action;
 
-public class CreateDataSetAction implements IHopsworksAction {
+import java.io.IOException;
 
-
-
-    public CreateDataSetAction(String dataSetName, String dataSetDescription, boolean searchable,boolean generateReadMe){
-
+public class CreateDataSetAction extends HopsworksAction {
+    
+    public CreateDataSetAction(String apiEndpoint, int port, boolean authentication, String path) {
+        super(apiEndpoint, port, authentication, path);
     }
-
+    
     @Override
-    public void execute() throws Exception {
+    public int execute() throws IOException {
 
         //TODO
         throw new java.lang.UnsupportedOperationException("Not supported yet.");
