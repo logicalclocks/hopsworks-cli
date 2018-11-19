@@ -105,14 +105,7 @@ public class HopsworksAPIConfig {
   }
 
   public String getProjectUrl() {
-//    try {
-//      return  "http://" + getHost() + ":" + getPort() + "/hopsworks-api/api/project/";
       return  this.apiUrl + "/hopsworks-api/api/project/";
-//      return  "http://" + InetAddress.getByName(getHost()).getHostAddress() + ":" + getPort() + "/hopsworks-api/api/project/";
-//    } catch (UnknownHostException ex) {
-//      Logger.getLogger(HopsworksAPIConfig.class.getName()).log(Level.SEVERE, null, ex);
-//    }
-//    return "";
   }
   
   public String getProjectNameUrl() {
