@@ -84,10 +84,10 @@ public class CommandLineMain {
         order = 0)
     public String fsArgs;
 
-//    @Parameter(names = JOBS,
-//        description = "Job commands",
-//        order = 1)
-//    public String jobsArgs;
+    @Parameter(names = JOBS,
+        description = "Job commands",
+        order = 1)
+    public String jobsArgs;
 
     @Parameter(names = "-conf",
         description = "Location of hops.properties config file",
@@ -256,11 +256,11 @@ public class CommandLineMain {
     if (a.project != null) {
       project = a.project;
     }
-    // Only one of the top-level commands should be active
-//    if (a.jobsArgs != null && a.fsArgs != null) {
-//      jc.usage();
-//      System.exit(1);
-//    }
+    // Only one of the top-level commands should be active (not allowed -> both null, both non-null)
+    if ((a.jobsArgs == null && a.fsArgs == null) || (a.jobsArgs != null && a.fsArgs != null)) {
+      jc.usage();
+      System.exit(1);
+    }
 
     JobsArgs jobsArgs = new JobsArgs();
     FsArgs fsArgs = new FsArgs();
@@ -277,22 +277,20 @@ public class CommandLineMain {
 
     
     try {
-//      if (a.jobsArgs != null) {
-//        JCommander jcJobs = JCommander.newBuilder()
-//            .addObject(jobsArgs)
-//            .build();
-//        jcJobs.setProgramName("jobs");
-//
-//        if (a.mainArgs == null) {
-//          jcJob.usage();
-//          System.exit(2);
-//        }
-//        a.mainArgs.add(0, a.jobsArgs);
-//        String[] commandArgs = a.mainArgs.toArray(new String[0]);
-//        jcJobs.parse(commandArgs);
-//
-//      } else if (a.fsArgs != null) {
-      if (a.fsArgs != null) {
+      if (a.jobsArgs != null) {
+        JCommander jcJobs = JCommander.newBuilder()
+            .addObject(jobsArgs)
+            .build();
+        jcJobs.setProgramName("jobs");
+
+        if (a.mainArgs == null) {
+          jcJob.usage();
+          System.exit(2);
+        }
+        a.mainArgs.add(0, a.jobsArgs);
+        String[] commandArgs = a.mainArgs.toArray(new String[0]);
+        jcJobs.parse(commandArgs);
+      } else if (a.fsArgs != null) {
         if (a.mainArgs == null) {
           jcFs.usage();
           System.exit(2);
