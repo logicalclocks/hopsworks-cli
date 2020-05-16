@@ -2,23 +2,31 @@ package io.hops.upload.cookie;
 
 import io.hops.upload.beans.Server;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +48,27 @@ public class CookieAuth {
 //        this.password = password;
 //
 //    }
+
+    protected HttpClient getClient() {
+        HttpClient getClient = null;
+        try {
+            getClient = HttpClients
+                    .custom()
+                    .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null,
+                            TrustSelfSignedStrategy.INSTANCE).build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .build();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        return getClient;
+
+    }
+
 
 //    public CookieAuth(String authUrl,String email,String password){
     public CookieAuth(String authUrl,String apiKey){
@@ -75,13 +104,14 @@ public class CookieAuth {
     }
 
     public List<Cookie> auth() throws IOException {
-            CloseableHttpClient client = HttpClients.createDefault();
+//            CloseableHttpClient client = HttpClients.createDefault();
+            HttpClient client = getClient();
             HttpPost httpPost = new HttpPost(this.authUrl );
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
 //            params.add(new BasicNameValuePair("email", this.email));
 //            params.add(new BasicNameValuePair("password", this.password));
-            params.add(new BasicNameValuePair("ApiKey", this.apiKey));
+//            params.add(new BasicNameValuePair("ApiKey", this.apiKey));
             params.add(new BasicNameValuePair("otp", ""));
             httpPost.setEntity(new UrlEncodedFormEntity(params));
 
@@ -90,6 +120,8 @@ public class CookieAuth {
         httpPost.addHeader("Accept-Encoding" , "gzip, deflate");
         httpPost.addHeader("Content-Type" , "application/x-www-form-urlencoded");
 
+        httpPost.addHeader("ApiKey" , this.apiKey);
+
         httpPost.addHeader("DNT","1");
         httpPost.addHeader("Connection","keep-alive");
         this.toStringHttpEntity(httpPost.getEntity());
@@ -97,22 +129,23 @@ public class CookieAuth {
 
         HttpClientContext context = HttpClientContext.create();
 
-            CloseableHttpResponse response = client.execute(httpPost,context);
+//            CloseableHttpResponse response = client.execute(httpPost,context);
+        HttpResponse response = client.execute(httpPost);
         List<Cookie> cookies;
-        try {
+//        try {
             CookieStore cookieStore = context.getCookieStore();
 
             cookies = cookieStore.getCookies();
-        } finally {
-            response.close();
-        }
+//        } finally {
+//            response.close();
+//        }
 
         logger.info(" Cookie Auth @ "+ this.authUrl);
         this.printCookies(cookies);
         logger.info("Status Code: " + response.getStatusLine().getStatusCode() + "\n\n");
 
 
-        client.close();
+//        client.close();
 
         return cookies;
 

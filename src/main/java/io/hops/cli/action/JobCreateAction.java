@@ -4,10 +4,14 @@ import com.google.common.base.Strings;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +20,9 @@ import javax.json.JsonObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static org.apache.http.HttpHeaders.USER_AGENT;
@@ -34,7 +41,6 @@ public class JobCreateAction extends HopsworksAction {
     this.payload = payload;
   }
   
-  
   @Override
   public int execute() throws Exception {
     HttpContext localContext = null;
@@ -45,7 +51,8 @@ public class JobCreateAction extends HopsworksAction {
       localContext = generateContextWithCookies(cookies);
     }
   
-    HttpClient getClient = HttpClientBuilder.create().build();
+//    HttpClient getClient = HttpClientBuilder.create().build();
+    HttpClient getClient = getClient();
     String uri = getHttpServer().getAPIUrl() + "/project/" + projectId + "/jobs/spark";
     HttpPost request = new HttpPost(uri);
     request.addHeader("User-Agent", USER_AGENT);

@@ -14,11 +14,15 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +30,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import org.apache.hadoop.fs.Path;
 import static org.apache.http.HttpHeaders.USER_AGENT;
@@ -90,6 +98,27 @@ public class HTTPFileUpload {
     return s.hasNext() ? s.next() : "";
   }
 
+  private HttpClient getClient() {
+    HttpClient getClient = null;
+    try {
+      getClient = HttpClients
+              .custom()
+              .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null,
+                      TrustSelfSignedStrategy.INSTANCE).build())
+              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+              .build();
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    } catch (KeyManagementException e) {
+      e.printStackTrace();
+    } catch (KeyStoreException e) {
+      e.printStackTrace();
+    }
+    return getClient;
+
+  }
+
+
   private int startUploadFile(URI fileUri, String datasetPath, HopsworksAPIConfig apiConfig, String targetFileName) throws
       IOException {
 
@@ -101,7 +130,9 @@ public class HTTPFileUpload {
       localContext = this.generateContextWithCookies(cookies);
     }
 
-    HttpClient getClient = HttpClientBuilder.create().build();
+//    HttpClient getClient = HttpClientBuilder.create().build();
+    HttpClient getClient = getClient();
+
     HttpGet request = new HttpGet(apiConfig.getProjectNameUrl());
     request.addHeader("User-Agent", USER_AGENT);
     HttpResponse response = getClient.execute(request, localContext);
@@ -116,7 +147,9 @@ public class HTTPFileUpload {
     
     
     String apiUrl = apiConfig.getProjectUrl() + projectId.toString()  + "/dataset/upload/" + datasetPath;
-    final HttpClient client = HttpClientBuilder.create().build();
+//    final HttpClient client = HttpClientBuilder.create().build();
+    HttpClient client = getClient();
+
     final HttpPost post = new HttpPost(apiUrl);
     
     IFileToHttpEntity entityGenerator = new FlowHttpEntityGenerator();

@@ -20,8 +20,8 @@
   <developers>
     <developer>
       <name>Jim Dowling</name>
-      <email>jdowling@kth.se</email>
-      <organization>KTH University</organization>
+      <email>jim@logicalclocks.com</email>
+      <organization>Logical Clocks AB</organization>
     </developer>
     <developer>
       <name>Fabien Kirstein</name>
@@ -102,7 +102,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5</version>
+      <version>4.5.8</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

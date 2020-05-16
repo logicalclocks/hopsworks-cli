@@ -40,7 +40,8 @@ public class JobStopAction extends HopsworksAction {
       localContext = generateContextWithCookies(cookies);
     }
     
-    HttpClient getClient = HttpClientBuilder.create().build();
+//    HttpClient getClient = HttpClientBuilder.create().build();
+    HttpClient getClient = getClient();
     String uri = getHttpServer().getAPIUrl() + "/project/" + projectId + "/jobs/" + jobId + "/executions/stop";
     HttpPost request = new HttpPost(uri);
     request.addHeader("User-Agent", USER_AGENT);

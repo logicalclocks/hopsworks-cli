@@ -4,13 +4,21 @@ import io.hops.upload.beans.AuthData;
 import io.hops.upload.beans.Server;
 import io.hops.upload.cookie.CookieAuth;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public abstract class HopsworksAction {
@@ -57,7 +65,28 @@ public abstract class HopsworksAction {
     return localContext;
     
   }
-  
+
+  protected HttpClient getClient() {
+    HttpClient getClient = null;
+    try {
+      getClient = HttpClients
+              .custom()
+              .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null,
+                      TrustSelfSignedStrategy.INSTANCE).build())
+              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+              .build();
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    } catch (KeyManagementException e) {
+      e.printStackTrace();
+    } catch (KeyStoreException e) {
+      e.printStackTrace();
+    }
+    return getClient;
+
+  }
+
+
   public Server getHttpServer() {
     return httpServer;
   }

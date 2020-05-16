@@ -5,6 +5,23 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import io.hops.cli.config.HopsworksAPIConfig;
 import io.hops.upload.net.HTTPFileUpload;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.util.EntityUtils;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -14,6 +31,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -187,9 +207,80 @@ public class CommandLineMain {
 
   }
 
+
+  public static class Test {
+    public static void exec() throws IOException, KeyStoreException,
+            NoSuchAlgorithmException, KeyManagementException {
+
+      HttpClient httpclient = HttpClients
+              .custom()
+              .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null,
+                      TrustSelfSignedStrategy.INSTANCE).build())
+              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+              .build();
+
+//      CloseableHttpClient httpclient = HttpClients.createDefault();
+//      try {
+        HttpPost httppost = new HttpPost("https://35.185.114.183/hopsworks-api/api/project/119/" +
+                "dataset/upload/Resources");
+
+        FileBody bin = new FileBody(new File("C:\\Users\\Jim Dowling\\IdeaProjects\\hopsworks-cli\\pom.xml"));
+        // the API key here
+        StringBody comment = new StringBody(
+                "pTpaLQJFkfkxwgPN.YU2Q4Dl1zj70J0qRSYS3gdIjOU2yoIPU7qofJwy2eFaFcFfZoFbXOVIJvm9K7iEW",
+                ContentType.TEXT_PLAIN);
+
+        HttpEntity reqEntity = MultipartEntityBuilder.create()
+                .addPart("ApiKy", comment)
+                .addPart("file", bin)
+                .build();
+
+        httppost.addHeader("Authorization" ,
+                "ApiKey pTpaLQJFkfkxwgPN.YU2Q4Dl1zj70J0qRSYS3gdIjOU2yoIPU7qofJwy2eFaFcFfZoFbXOVIJvm9K7iEW");
+
+        httppost.setEntity(reqEntity);
+
+        System.out.println("executing request " + httppost.getRequestLine());
+//        CloseableHttpResponse response = httpclient.execute(httppost);
+        HttpResponse response = httpclient.execute(httppost);
+//        try {
+          System.out.println("----------------------------------------");
+          System.out.println(response.getStatusLine());
+          HttpEntity resEntity = response.getEntity();
+          if (resEntity != null) {
+            System.out.println("ToString:" + EntityUtils.toString(resEntity));
+          }
+          EntityUtils.consume(resEntity);
+//        } finally {
+//          response.close();
+//        }
+//      } finally {
+//        httpclient.close();
+//      }
+
+
+    }
+  }
+
+
   public static void main(String[] args) {
 
     System.setProperty("java.net.preferIPv4Stack", "true");
+
+//    try {
+//      Test.exec();
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//    } catch (NoSuchAlgorithmException e) {
+//      e.printStackTrace();
+//    } catch (KeyStoreException e) {
+//      e.printStackTrace();
+//    } catch (KeyManagementException e) {
+//      e.printStackTrace();
+//    }
+//    System.exit(0);
+
+
 
     // Priority for configuration variables/args (1 is highest, 3 is lowest): 
     // 1. Command Line > 2. Environment Variables > 3. conf/hops.properties
