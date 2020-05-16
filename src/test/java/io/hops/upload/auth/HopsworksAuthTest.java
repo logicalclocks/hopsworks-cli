@@ -21,9 +21,11 @@ public class HopsworksAuthTest {
         String url = "http://bbc3.sics.se:21756/hopsworks-api/api";  //test server
         String anAccount = "admin@kth.se";
         String k3y = "admin";
+        String apiKey = "admin";
         String projectName = "test";
 
-        this.hopsworksAPIConfig = new HopsworksAPIConfig(anAccount,k3y,url, projectName);
+        this.hopsworksAPIConfig = new HopsworksAPIConfig(apiKey,url, projectName);
+//        this.hopsworksAPIConfig = new HopsworksAPIConfig(anAccount,k3y,url, projectName);
 
     }
 
@@ -40,7 +42,8 @@ public class HopsworksAuthTest {
 
 
         CookieAuth cookieAuth = new CookieAuth(this.hopsworksAPIConfig.getApiUrl()+authPath,
-                this.hopsworksAPIConfig.getUserName(),this.hopsworksAPIConfig.getPassword());
+                this.hopsworksAPIConfig.getApiKey());
+//                this.hopsworksAPIConfig.getUserName(),this.hopsworksAPIConfig.getPassword());
         List<Cookie> cookies = null;
         try {
             cookies =  cookieAuth.auth();

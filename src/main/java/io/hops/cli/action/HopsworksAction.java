@@ -22,19 +22,28 @@ public abstract class HopsworksAction {
     this.httpServer = new Server(apiEndpoint, port, authentication, path);
   }
   
-  public void activateAuth(String email, String password, String authPath) {
-    authData = new AuthData(email, password, authPath);
+//  public void activateAuth(String email, String password, String authPath) {
+//    authData = new AuthData(email, password, authPath);
+//    httpServer.setAuthentication(true);
+//  }
+//
+//  public void activateAuth(String email, String password, String authPath, String jwt) {
+//    authData = new AuthData(email, password, authPath, jwt);
+//    httpServer.setAuthentication(true);
+//  }
+
+  public void activateAuth(String apiKey, String authPath) {
+    authData = new AuthData(apiKey, authPath);
     httpServer.setAuthentication(true);
   }
-  
-  public void activateAuth(String email, String password, String authPath, String jwt) {
-    authData = new AuthData(email, password, authPath, jwt);
-    httpServer.setAuthentication(true);
-  }
-  
+
+
   public List<Cookie> auth() throws IOException {
+//    CookieAuth cookieAuth = new CookieAuth(httpServer.getAPIUrl() + authData.getAuthPath(),
+//      authData.getEmail(), authData.getPassword());
     CookieAuth cookieAuth = new CookieAuth(httpServer.getAPIUrl() + authData.getAuthPath(),
-      authData.getEmail(), authData.getPassword());
+            authData.getApiKey());
+//            authData.getEmail(), authData.getPassword());
     return cookieAuth.auth();
   }
   

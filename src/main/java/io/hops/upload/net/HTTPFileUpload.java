@@ -44,20 +44,33 @@ public class HTTPFileUpload {
 
   private static final Logger logger = LoggerFactory.getLogger(HTTPFileUpload.class);
 
-  public void activateAuth(String email, String password, String authPath) {
-    this.authData = new AuthData(email, password, authPath);
+//  public void activateAuth(String email, String password, String authPath) {
+//    this.authData = new AuthData(email, password, authPath);
+//    this.httpServer.setAuthentication(true);
+//
+//  }
+
+  public void activateAuth(String apiKey, String authPath) {
+    this.authData = new AuthData(apiKey, authPath);
     this.httpServer.setAuthentication(true);
 
   }
+
 
   public HTTPFileUpload(String apiEndpoint, int port, boolean authentication, String path) {
     this.httpServer = new Server(apiEndpoint, port, authentication, path);
 
   }
 
+//  private List<Cookie> auth() throws IOException {
+//    CookieAuth cookieAuth = new CookieAuth(this.httpServer.getAPIUrl() + this.authData.getAuthPath(),
+//        this.authData.getEmail(), this.authData.getPassword());
+//    return cookieAuth.auth();
+//  }
   private List<Cookie> auth() throws IOException {
     CookieAuth cookieAuth = new CookieAuth(this.httpServer.getAPIUrl() + this.authData.getAuthPath(),
-        this.authData.getEmail(), this.authData.getPassword());
+        this.authData.getApiKey());
+//        this.authData.getEmail(), this.authData.getPassword());
     return cookieAuth.auth();
   }
 

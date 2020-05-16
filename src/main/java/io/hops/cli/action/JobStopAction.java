@@ -44,10 +44,11 @@ public class JobStopAction extends HopsworksAction {
     String uri = getHttpServer().getAPIUrl() + "/project/" + projectId + "/jobs/" + jobId + "/executions/stop";
     HttpPost request = new HttpPost(uri);
     request.addHeader("User-Agent", USER_AGENT);
+    request.addHeader("ApiKey", getAuthData().getApiKey());
     //Set "Authorization" only for JWT. Not needed in Hopsworks 0.6
-    if (!Strings.isNullOrEmpty(getAuthData().getJwt())){
-      request.addHeader("Authorization", "Bearer " + getAuthData().getJwt());
-    }
+//    if (!Strings.isNullOrEmpty(getAuthData().getJwt())){
+//      request.addHeader("Authorization", "Bearer " + getAuthData().getJwt());
+//    }
     HttpResponse response = getClient.execute(request, localContext);
     BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
     StringBuilder result = new StringBuilder();

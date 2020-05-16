@@ -20,8 +20,9 @@ public class HopsworksFileUploadTest {
   public void setUp() {
     cwd = "file://" + System.getProperty("user.dir");
     String authPath = "/auth/login";
-    String anAccount = "admin@kth.se";
+    String anAccount = "admin@hopsworks.ai";
     String theS3cr3t = "admin";
+    String apiKey = "admin";
     String apiEndpoint = "http://bbc6.sics.se"; //test server
     int port = 8080;
     String path = "/hopsworks-api/api";
@@ -30,8 +31,10 @@ public class HopsworksFileUploadTest {
     folder = "Resources/jim";
 
     httpFileUpload = new HTTPFileUpload(apiEndpoint, port, true, path);
-    httpFileUpload.activateAuth(anAccount, theS3cr3t, authPath);
-    hopsworksAPIConfig = new HopsworksAPIConfig(anAccount, theS3cr3t, apiEndpoint + ":8080" , "test");
+//    httpFileUpload.activateAuth(anAccount, theS3cr3t, authPath);
+    httpFileUpload.activateAuth(anAccount, apiKey);
+    hopsworksAPIConfig = new HopsworksAPIConfig(apiKey, apiEndpoint + ":8080" , "test");
+//    hopsworksAPIConfig = new HopsworksAPIConfig(anAccount, theS3cr3t, apiEndpoint + ":8080" , "test");
 
   }
 

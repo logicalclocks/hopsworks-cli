@@ -44,7 +44,7 @@ public class CommandLineMain {
   private static final String HOPSWORKS_CERT = "HOPSWORKS_CERT";
   private static final String HOPSWORKS_URL = "HOPSWORKS_URL";
   private static final String STAGING_DIR = "STAGING_DIR";
-
+  private static final String HOPSWORKS_APIKEY = "HOPSWORKS_APIKEY";
   private static final String path = "/hopsworks-api/api";
   private static final String authPath = "/auth/login";
 
@@ -64,6 +64,7 @@ public class CommandLineMain {
   public static String hopsCert;
   public static String hopsworksUrl;
   public static String stagingDir;
+  public static String hopsworksApiKey;
   public static HTTPFileUpload httpFileUpload = null;
 
   ;
@@ -204,6 +205,7 @@ public class CommandLineMain {
     hopsCert = System.getenv().get(HOPSWORKS_CERT);
     hopsworksUrl = System.getenv().get(HOPSWORKS_URL);
     stagingDir = System.getenv().get(STAGING_DIR);
+    hopsworksApiKey = System.getenv().get(HOPSWORKS_APIKEY);
 
     Args a = new Args();
     JCommander jc = JCommander.newBuilder()
@@ -245,6 +247,8 @@ public class CommandLineMain {
       hopsCert = CommandLineMain.getProperty(hopsCert, HOPSWORKS_CERT);
       hopsworksUrl = CommandLineMain.getProperty(hopsworksUrl, HOPSWORKS_URL);
       stagingDir = CommandLineMain.getProperty(stagingDir, STAGING_DIR);
+      hopsworksApiKey = CommandLineMain.getProperty(hopsworksApiKey, HOPSWORKS_APIKEY);
+
     } catch (IOException ex) {
       System.err.println("Problem reading/parsing the conf/hops.properties file.");
       System.exit(-1);
@@ -323,9 +327,11 @@ public class CommandLineMain {
           String datasetPath = fsArgs.copyFromLocal.get(1);
 
           httpFileUpload = new HTTPFileUpload("http://" + hostname, port, true, path);
-          httpFileUpload.activateAuth(email, password, authPath);
+//          httpFileUpload.activateAuth(email, password, authPath);
+          httpFileUpload.activateAuth(hopsworksApiKey, authPath);
           try {
-            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(email, password, hopsworksUrl, project);
+//            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(email, password, hopsworksUrl, project);
+            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(hopsworksApiKey, hopsworksUrl, project);
             httpFileUpload.uploadFile(absolutePath, datasetPath, hopsworksAPIConfig);
           } catch (IOException ex) {
             Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);

@@ -26,17 +26,25 @@ import java.util.List;
 public class CookieAuth {
 
     private String authUrl;
-    private String email;
-    private String password;
+//    private String email;
+//    private String password;
+    private String apiKey;
 
     private Server server;
     private static final Logger logger = LoggerFactory.getLogger(CookieAuth.class);
 
 
-    public CookieAuth(String authUrl,String email,String password){
+//    public CookieAuth(String authUrl,String email,String password){
+//        this.authUrl = authUrl;
+//        this.email = email;
+//        this.password = password;
+//
+//    }
+
+//    public CookieAuth(String authUrl,String email,String password){
+    public CookieAuth(String authUrl,String apiKey){
         this.authUrl = authUrl;
-        this.email = email;
-        this.password = password;
+        this.apiKey = apiKey;
 
     }
     private String toStringHttpEntity(HttpEntity entity){
@@ -71,8 +79,9 @@ public class CookieAuth {
             HttpPost httpPost = new HttpPost(this.authUrl );
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("email", this.email));
-            params.add(new BasicNameValuePair("password", this.password));
+//            params.add(new BasicNameValuePair("email", this.email));
+//            params.add(new BasicNameValuePair("password", this.password));
+            params.add(new BasicNameValuePair("ApiKey", this.apiKey));
             params.add(new BasicNameValuePair("otp", ""));
             httpPost.setEntity(new UrlEncodedFormEntity(params));
 

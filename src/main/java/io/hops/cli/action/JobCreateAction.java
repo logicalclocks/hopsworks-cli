@@ -49,10 +49,12 @@ public class JobCreateAction extends HopsworksAction {
     String uri = getHttpServer().getAPIUrl() + "/project/" + projectId + "/jobs/spark";
     HttpPost request = new HttpPost(uri);
     request.addHeader("User-Agent", USER_AGENT);
-    //Set "Authorization" only for JWT. Not needed in Hopsworks 0.6
-    if (!Strings.isNullOrEmpty(getAuthData().getJwt())){
-      request.addHeader("Authorization", "Bearer " + getAuthData().getJwt());
-    }
+    request.addHeader("ApiKey", getAuthData().getApiKey());
+
+//    //Set "Authorization" only for JWT. Not needed in Hopsworks 0.6
+//    if (!Strings.isNullOrEmpty(getAuthData().getJwt())){
+//      request.addHeader("Authorization", "Bearer " + getAuthData().getJwt());
+//    }
     StringEntity entity = new StringEntity(payload.toString());
     request.setEntity(entity);
     request.setHeader("Accept", "application/json");
