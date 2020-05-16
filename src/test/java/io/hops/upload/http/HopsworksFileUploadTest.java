@@ -23,8 +23,8 @@ public class HopsworksFileUploadTest {
     String anAccount = "admin@hopsworks.ai";
     String theS3cr3t = "admin";
     String apiKey = "admin";
-    String apiEndpoint = "http://bbc6.sics.se"; //test server
-    int port = 8080;
+    String apiEndpoint = "https://bbc6.sics.se"; //test server
+    int port = 443;
     String path = "/hopsworks-api/api";
 
     projectId = "1";

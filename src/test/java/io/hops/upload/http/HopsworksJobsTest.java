@@ -21,7 +21,7 @@ public class HopsworksJobsTest {
 //  private String theS3cr3t = "admin";
   private String apiKey = "....";
   private String apiEndpoint = "http://localhost"; //test server
-  private int port = 8080;
+  private int port = 443;
   private String path = "/hopsworks-api/api";
   private int projectId = 1;
   private String projectName = "demo_spark_admin000";

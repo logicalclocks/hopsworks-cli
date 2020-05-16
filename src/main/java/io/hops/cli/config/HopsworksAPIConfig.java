@@ -95,7 +95,7 @@ public class HopsworksAPIConfig {
   public int getPort() {
     int port = this.url.getPort();
     if (port == -1) {
-      return 80; //no specific port in the url means standard port 80
+      return 443; //no specific port in the url means standard port 80
     }
     return port;
   }
