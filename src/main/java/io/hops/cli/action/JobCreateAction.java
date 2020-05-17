@@ -43,20 +43,19 @@ public class JobCreateAction extends HopsworksAction {
   
   @Override
   public int execute() throws Exception {
-    HttpContext localContext = null;
-  
-    if (getHttpServer().isAuthentication()) {
-      List<Cookie> cookies;
-      cookies = auth();
-      localContext = generateContextWithCookies(cookies);
-    }
+//    HttpContext localContext = null;
+//    if (getHttpServer().isAuthentication()) {
+//      List<Cookie> cookies;
+//      cookies = auth();
+//      localContext = generateContextWithCookies(cookies);
+//    }
   
 //    HttpClient getClient = HttpClientBuilder.create().build();
     HttpClient getClient = getClient();
     String uri = getHttpServer().getAPIUrl() + "/project/" + projectId + "/jobs/spark";
     HttpPost request = new HttpPost(uri);
     request.addHeader("User-Agent", USER_AGENT);
-    request.addHeader("ApiKey", getAuthData().getApiKey());
+    request.addHeader("Authorization", "ApiKey " + getAuthData().getApiKey());
 
 //    //Set "Authorization" only for JWT. Not needed in Hopsworks 0.6
 //    if (!Strings.isNullOrEmpty(getAuthData().getJwt())){
@@ -67,7 +66,7 @@ public class JobCreateAction extends HopsworksAction {
     request.setHeader("Accept", "application/json");
     request.setHeader("Content-type", "application/json");
     
-    HttpResponse response = getClient.execute(request, localContext);
+    HttpResponse response = getClient.execute(request); // , localContext
     BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
     StringBuilder result = new StringBuilder();
     String line = "";

@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 public class HopsworksJobsTest {
   private String authPath = "/auth/login";
-//  private String anAccount = "admin@kth.se";
+  private String email = "admin@hopsworks.ai";
 //  private String theS3cr3t = "admin";
   private String apiKey = "....";
   private String apiEndpoint = "http://localhost"; //test server
@@ -44,7 +44,7 @@ public class HopsworksJobsTest {
         payload = jsonReader.readObject();
       }
       JobCreateAction jobCreateAction = new JobCreateAction(apiEndpoint, port, true, path, projectId, payload);
-      jobCreateAction.activateAuth(apiKey, authPath);
+      jobCreateAction.activateAuth(email, apiKey); // , authPath
       statusCode = jobCreateAction.execute();
     } catch (Exception e) {
       e.printStackTrace();
@@ -62,7 +62,7 @@ public class HopsworksJobsTest {
       int jobId = 2;
       JobStartAction jobStartAction = new JobStartAction(apiEndpoint, port, true, path, projectId, jobId);
 //      jobStartAction.activateAuth(anAccount, theS3cr3t, authPath, jwt);
-      jobStartAction.activateAuth(apiKey, authPath);
+      jobStartAction.activateAuth(email, apiKey); // , authPath
       statusCode = jobStartAction.execute();
     } catch (Exception e) {
       e.printStackTrace();
@@ -77,7 +77,7 @@ public class HopsworksJobsTest {
     try {
       int jobId = 207;
       JobStopAction jobStopAction = new JobStopAction(apiEndpoint, port, true, path, projectId, jobId);
-      jobStopAction.activateAuth(apiKey, authPath);
+      jobStopAction.activateAuth(email, apiKey); // , authPath
       statusCode = jobStopAction.execute();
     } catch (Exception e) {
       e.printStackTrace();

@@ -66,7 +66,7 @@ public class CommandLineMain {
   private static final String STAGING_DIR = "STAGING_DIR";
   private static final String HOPSWORKS_APIKEY = "HOPSWORKS_APIKEY";
   private static final String path = "/hopsworks-api/api";
-  private static final String authPath = "/auth/login";
+//  private static final String authPath = "/auth/login";
 
   /**
    * *
@@ -414,15 +414,17 @@ public class CommandLineMain {
 
         if (fsArgs.copyFromLocal != null) {
           String relativePath = fsArgs.copyFromLocal.get(0);
-          String absolutePath = FileSystems.getDefault().getPath(relativePath).normalize().toAbsolutePath().toString();
+//          String absolutePath = FileSystems.getDefault().getPath(relativePath).normalize().toAbsolutePath().toString();
+          String absolutePath = relativePath;
           String datasetPath = fsArgs.copyFromLocal.get(1);
 
-          httpFileUpload = new HTTPFileUpload("http://" + hostname, port, true, path);
+          httpFileUpload = new HTTPFileUpload("https://" + address.getHostAddress(), port, true, path);
+//          httpFileUpload = new HTTPFileUpload("http://" + hostname, port, true, path);
 //          httpFileUpload.activateAuth(email, password, authPath);
-          httpFileUpload.activateAuth(hopsworksApiKey, authPath);
+          httpFileUpload.activateAuth(email, hopsworksApiKey); //, authPath
           try {
 //            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(email, password, hopsworksUrl, project);
-            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(hopsworksApiKey, hopsworksUrl, project);
+            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(email, hopsworksApiKey, hopsworksUrl, project);
             httpFileUpload.uploadFile(absolutePath, datasetPath, hopsworksAPIConfig);
           } catch (IOException ex) {
             Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);

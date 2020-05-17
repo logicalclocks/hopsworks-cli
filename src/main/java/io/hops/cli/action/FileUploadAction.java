@@ -59,14 +59,14 @@ public class FileUploadAction extends HopsworksAction {
     this.hopsworksFolder = hopsworksFolder;
     this.filePath = path;
 
-    String authPath = this.hopsworksAPIConfig.getPathLogin();
+//    String authPath = this.hopsworksAPIConfig.getPathLogin();
     String apiKey = this.hopsworksAPIConfig.getApiKey();
-//    String userName = this.hopsworksAPIConfig.getUserName();
+    String email = this.hopsworksAPIConfig.getEmail();
 //    String password = this.hopsworksAPIConfig.getPassword();
 
     httpFileUpload = new HTTPFileUpload(this.hopsworksAPIConfig.getApiUrl(), this.hopsworksAPIConfig.getPort(),
         true, this.hopsworksAPIConfig.getPath());
-    httpFileUpload.activateAuth(apiKey, authPath);
+    httpFileUpload.activateAuth(email, apiKey);
 //    httpFileUpload.activateAuth(userName, password, authPath);
   }
 

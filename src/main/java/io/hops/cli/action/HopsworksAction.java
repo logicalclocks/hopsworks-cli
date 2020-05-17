@@ -40,20 +40,21 @@ public abstract class HopsworksAction {
 //    httpServer.setAuthentication(true);
 //  }
 
-  public void activateAuth(String apiKey, String authPath) {
-    authData = new AuthData(apiKey, authPath);
+  public void activateAuth(String email, String apiKey) {
+    authData = new AuthData(email, apiKey);
     httpServer.setAuthentication(true);
   }
 
 
-  public List<Cookie> auth() throws IOException {
+//  public List<Cookie> auth() throws IOException {
+////    CookieAuth cookieAuth = new CookieAuth(httpServer.getAPIUrl() + authData.getAuthPath(),
+////      authData.getEmail(), authData.getPassword());
 //    CookieAuth cookieAuth = new CookieAuth(httpServer.getAPIUrl() + authData.getAuthPath(),
-//      authData.getEmail(), authData.getPassword());
-    CookieAuth cookieAuth = new CookieAuth(httpServer.getAPIUrl() + authData.getAuthPath(),
-            authData.getApiKey());
-//            authData.getEmail(), authData.getPassword());
-    return cookieAuth.auth();
-  }
+//            authData.getEmail(),
+//            authData.getApiKey());
+////            authData.getEmail(), authData.getPassword());
+//    return cookieAuth.auth();
+//  }
   
   public HttpContext generateContextWithCookies(List<Cookie> cookies) {
     CookieStore cookieStore = new BasicCookieStore();

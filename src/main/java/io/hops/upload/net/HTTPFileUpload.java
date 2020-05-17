@@ -58,8 +58,10 @@ public class HTTPFileUpload {
 //
 //  }
 
-  public void activateAuth(String apiKey, String authPath) {
-    this.authData = new AuthData(apiKey, authPath);
+//  public void activateAuth(String email, String apiKey, String authPath) {
+  public void activateAuth(String email, String apiKey) {
+//    this.authData = new AuthData(email, apiKey, authPath);
+    this.authData = new AuthData(email, apiKey);
     this.httpServer.setAuthentication(true);
 
   }
@@ -75,12 +77,14 @@ public class HTTPFileUpload {
 //        this.authData.getEmail(), this.authData.getPassword());
 //    return cookieAuth.auth();
 //  }
-  private List<Cookie> auth() throws IOException {
-    CookieAuth cookieAuth = new CookieAuth(this.httpServer.getAPIUrl() + this.authData.getAuthPath(),
-        this.authData.getApiKey());
-//        this.authData.getEmail(), this.authData.getPassword());
-    return cookieAuth.auth();
-  }
+
+//  private List<Cookie> auth() throws IOException {
+//    CookieAuth cookieAuth = new CookieAuth(this.httpServer.getAPIUrl() + this.authData.getAuthPath(),
+//        this.authData.getEmail(),
+//        this.authData.getApiKey());
+////        this.authData.getEmail(), this.authData.getPassword());
+//    return cookieAuth.auth();
+//  }
 
   private HttpContext generateContextWithCookies(List<Cookie> cookies) {
     CookieStore cookieStore = new BasicCookieStore();
@@ -124,17 +128,20 @@ public class HTTPFileUpload {
 
     HttpContext localContext = null;
 
-    if (this.httpServer.isAuthentication()) {
-      List<Cookie> cookies;
-      cookies = this.auth();
-      localContext = this.generateContextWithCookies(cookies);
-    }
+//    if (this.httpServer.isAuthentication()) {
+//      List<Cookie> cookies;
+//      cookies = this.auth();
+//      localContext = this.generateContextWithCookies(cookies);
+//    }
+    HttpClientContext context = HttpClientContext.create();
+
 
 //    HttpClient getClient = HttpClientBuilder.create().build();
     HttpClient getClient = getClient();
 
     HttpGet request = new HttpGet(apiConfig.getProjectNameUrl());
     request.addHeader("User-Agent", USER_AGENT);
+    request.addHeader("Authorization", "ApiKey " + apiConfig.getApiKey());
     HttpResponse response = getClient.execute(request, localContext);
     BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
     StringBuilder result = new StringBuilder();
@@ -151,7 +158,14 @@ public class HTTPFileUpload {
     HttpClient client = getClient();
 
     final HttpPost post = new HttpPost(apiUrl);
-    
+    post.addHeader("Authorization", "ApiKey " + apiConfig.getApiKey());
+
+//    List<Cookie> cookies;
+//    CookieStore cookieStore = context.getCookieStore();
+//    cookies = cookieStore.getCookies();
+//    localContext = this.generateContextWithCookies(cookies);
+
+
     IFileToHttpEntity entityGenerator = new FlowHttpEntityGenerator();
 
     entityGenerator.init(fileUri, targetFileName);
@@ -210,11 +224,13 @@ public class HTTPFileUpload {
     int statusCode;
     HttpEntity entity = entityGenerator.next();
     post.setEntity(entity);
+
     logger.info(post.toString());
 
     HttpResponse response;
     if (this.httpServer.isAuthentication()) {
-      response = client.execute(post, localContext);
+      response = client.execute(post);
+//      response = client.execute(post, localContext);
     } else {
       response = client.execute(post);
     }

@@ -2,7 +2,7 @@ package io.hops.upload.beans;
 
 public class AuthData {
 
-//    private String email;
+    private String email;
 //    private String password;
     private String authPath;
 //    private String jwt;
@@ -19,34 +19,36 @@ public class AuthData {
 //        this.authPath = authPath;
 //        this.jwt = jwt;
 //    }
-    public AuthData(String apiKey,String authPath){
+//    , String authPath
+    public AuthData(String apiKey,String email){
         this.apiKey = apiKey;
-        this.authPath = authPath;
+        this.email = email;
+//        this.authPath = authPath;
     }
 
-//    public String getEmail() {
-//        return email;
-//    }
+    public String getEmail() {
+        return email;
+    }
 //
 //    public String getPassword() {
 //        return password;
 //    }
 //
-//    public void setEmail(String email) {
-//        this.email = email;
-//    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 //
 //    public void setPassword(String password) {
 //        this.password = password;
 //    }
 
-    public void setAuthPath(String authPath) {
-        this.authPath = authPath;
-    }
-
-    public String getAuthPath() {
-        return authPath;
-    }
+//    public void setAuthPath(String authPath) {
+//        this.authPath = authPath;
+//    }
+//
+//    public String getAuthPath() {
+//        return authPath;
+//    }
     
 //    public String getJwt() {
 //        return jwt;

@@ -34,7 +34,7 @@ import java.util.List;
 public class CookieAuth {
 
     private String authUrl;
-//    private String email;
+    private String email;
 //    private String password;
     private String apiKey;
 
@@ -71,8 +71,9 @@ public class CookieAuth {
 
 
 //    public CookieAuth(String authUrl,String email,String password){
-    public CookieAuth(String authUrl,String apiKey){
+    public CookieAuth(String authUrl,String email, String apiKey){
         this.authUrl = authUrl;
+        this.email = email;
         this.apiKey = apiKey;
 
     }
@@ -109,9 +110,8 @@ public class CookieAuth {
             HttpPost httpPost = new HttpPost(this.authUrl );
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
-//            params.add(new BasicNameValuePair("email", this.email));
+            params.add(new BasicNameValuePair("email", this.email));
 //            params.add(new BasicNameValuePair("password", this.password));
-//            params.add(new BasicNameValuePair("ApiKey", this.apiKey));
             params.add(new BasicNameValuePair("otp", ""));
             httpPost.setEntity(new UrlEncodedFormEntity(params));
 
@@ -120,7 +120,7 @@ public class CookieAuth {
         httpPost.addHeader("Accept-Encoding" , "gzip, deflate");
         httpPost.addHeader("Content-Type" , "application/x-www-form-urlencoded");
 
-        httpPost.addHeader("ApiKey" , this.apiKey);
+        httpPost.addHeader("Authorization" , "ApiKey " + this.apiKey);
 
         httpPost.addHeader("DNT","1");
         httpPost.addHeader("Connection","keep-alive");

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 public class HopsworksAPIConfig {
 
-//  private String userName;
+  private String email;
 //  private String password;
   private String apiKey;
   private String apiUrl;
@@ -18,15 +18,16 @@ public class HopsworksAPIConfig {
   private URL url;
 
   private final String DEFAULT_PATH_FILE_UPLOAD = "/project/{id}/dataset/{fileName}";
-  private final String DEFAULT_PATH_LOGIN = "/auth/login";
+//  private final String DEFAULT_PATH_LOGIN = "/auth/login";
 
-  private String pathLogin;
+//  private String pathLogin;
   private String pathFileUpload;
 
 //  public HopsworksAPIConfig(String userName, String password, String apiUrl, String projectName) {
-  public HopsworksAPIConfig(String apiKey, String apiUrl, String projectName) {
+  public HopsworksAPIConfig(String email, String apiKey, String apiUrl, String projectName) {
 //    this.userName = userName;
 //    this.password = password;
+    this.email = email;
     this.apiKey = apiKey;
     this.apiUrl = apiUrl;
 
@@ -38,14 +39,14 @@ public class HopsworksAPIConfig {
       e.printStackTrace();
     }
 
-    this.pathLogin = this.DEFAULT_PATH_LOGIN;
+//    this.pathLogin = this.DEFAULT_PATH_LOGIN;
     this.pathFileUpload = this.DEFAULT_PATH_FILE_UPLOAD;
 
   }
 
-  public String getPathLogin() {
-    return pathLogin;
-  }
+//  public String getPathLogin() {
+//    return pathLogin;
+//  }
 
   public String getPathFileUpload() {
     return pathFileUpload;
@@ -55,18 +56,19 @@ public class HopsworksAPIConfig {
     this.pathFileUpload = pathFileUpload;
   }
 
-  public void setPathLogin(String pathLogin) {
-    this.pathLogin = pathLogin;
+//  public void setPathLogin(String pathLogin) {
+//    this.pathLogin = pathLogin;
+//  }
+
+  public String getEmail() {
+    return email;
   }
 
-//  public String getUserName() {
-//    return userName;
-//  }
-//
-//  public void setUserName(String userName) {
-//    this.userName = userName;
-//  }
-//
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  //
 //  public String getPassword() {
 //    return password;
 //  }

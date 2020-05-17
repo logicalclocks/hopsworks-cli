@@ -32,8 +32,8 @@ public class HopsworksFileUploadTest {
 
     httpFileUpload = new HTTPFileUpload(apiEndpoint, port, true, path);
 //    httpFileUpload.activateAuth(anAccount, theS3cr3t, authPath);
-    httpFileUpload.activateAuth(anAccount, apiKey);
-    hopsworksAPIConfig = new HopsworksAPIConfig(apiKey, apiEndpoint + ":8080" , "test");
+    httpFileUpload.activateAuth(anAccount, apiKey); // , authPath
+    hopsworksAPIConfig = new HopsworksAPIConfig(anAccount, apiKey, apiEndpoint + ":8080" , "test");
 //    hopsworksAPIConfig = new HopsworksAPIConfig(anAccount, theS3cr3t, apiEndpoint + ":8080" , "test");
 
   }
