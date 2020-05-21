@@ -106,17 +106,21 @@ public class CommandLineMain {
 
   public static class JobsArgs {
 
-    @Parameter(names = "submit",
-        description = "Submit a python file (.py) or a jar file (.jar) for execution.")
-    public String submit;
+    @Parameter(names = "create",
+        description = "Create a Job with a python file (.py), notebook (.ipynb) or a jar file (.jar).")
+    public String create;
+
+    @Parameter(names = "run",
+            description = "Run a Job with a given name.")
+    public String run;
 
     @Parameter(names = "remove",
-        description = "Remove a job with given id.")
-    public int removeJobId;
+        description = "Remove a job with given name.")
+    public int remove;
 
     @Parameter(names = "logs",
-        description = "Download the latest logs for a job with given id.")
-    public int logsJobId;
+        description = "Download the latest logs for a job with given name.")
+    public int logs;
 
     @Parameter(names = "-name",
         description = "Job ")
@@ -159,7 +163,7 @@ public class CommandLineMain {
 //        description = "Make a directory in the given path")
 //    public String mkdirPath;
 
-    @Parameter(names = "-copyFromLocal",
+    @Parameter(names = "cp",
         arity = 2,
         description = "Copy a file from the local filesystem to the remote")
     public List<String> copyFromLocal;
@@ -182,50 +186,6 @@ public class CommandLineMain {
     }
     return variable;
 
-  }
-
-
-  public static class Test {
-    public static void exec() throws IOException, KeyStoreException,
-            NoSuchAlgorithmException, KeyManagementException {
-
-      HttpClient httpclient = HttpClients
-              .custom()
-              .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null,
-                      TrustSelfSignedStrategy.INSTANCE).build())
-              .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-              .build();
-
-        HttpPost httppost = new HttpPost("https://35.185.114.183/hopsworks-api/api/project/119/" +
-                "dataset/upload/Resources");
-
-        FileBody bin = new FileBody(new File("C:\\Users\\Jim Dowling\\IdeaProjects\\hopsworks-cli\\pom.xml"));
-        // the API key here
-        StringBody comment = new StringBody(
-                "pTpaLQJFkfkxwgPN.YU2Q4Dl1zj70J0qRSYS3gdIjOU2yoIPU7qofJwy2eFaFcFfZoFbXOVIJvm9K7iEW",
-                ContentType.TEXT_PLAIN);
-
-        HttpEntity reqEntity = MultipartEntityBuilder.create()
-                .addPart("ApiKy", comment)
-                .addPart("file", bin)
-                .build();
-
-        httppost.addHeader("Authorization" ,
-                "ApiKey pTpaLQJFkfkxwgPN.YU2Q4Dl1zj70J0qRSYS3gdIjOU2yoIPU7qofJwy2eFaFcFfZoFbXOVIJvm9K7iEW");
-
-        httppost.setEntity(reqEntity);
-
-        System.out.println("executing request " + httppost.getRequestLine());
-        HttpResponse response = httpclient.execute(httppost);
-          System.out.println("----------------------------------------");
-          System.out.println(response.getStatusLine());
-          HttpEntity resEntity = response.getEntity();
-          if (resEntity != null) {
-            System.out.println("ToString:" + EntityUtils.toString(resEntity));
-          }
-          EntityUtils.consume(resEntity);
-
-    }
   }
 
 
@@ -324,23 +284,13 @@ public class CommandLineMain {
         String[] commandArgs = a.mainArgs.toArray(new String[0]);
         jcFs.parse(commandArgs);
 
-        String authPath = "/auth/login";
-        URL url = null;
-        InetAddress address = null;
         try {
-          url = new URL(hopsworksUrl);
-          address = InetAddress.getByName(url.getHost());
+          new URL(hopsworksUrl);
         } catch (MalformedURLException ex) {
           Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
           jc.usage();
           System.exit(1);
-        } catch (UnknownHostException ex) {
-          Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
-          jc.usage();
-          System.exit(1);
         }
-        String hostname = address.getHostName();
-        int port = url.getPort();
 
         if (fsArgs.copyFromLocal != null) {
           String relativePath = fsArgs.copyFromLocal.get(0);
