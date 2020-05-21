@@ -5,32 +5,13 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import io.hops.cli.action.FileUploadAction;
 import io.hops.cli.config.HopsworksAPIConfig;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -47,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class CommandLineMain {
 
-  private static final String JOBS = "jobs";
+  private static final String job = "job";
   private static final String FS = "fs";
 
   private static final String HOPSWORKS_PROJECT = "HOPSWORKS_PROJECT";
@@ -68,7 +49,7 @@ public class CommandLineMain {
 
   /**
    * There are 2 levels of commands.
-   * 1. The top level commands (Args) - fs, jobs
+   * 1. The top level commands (Args) - fs, job
    * 2. Sub-commands for each of the top-level commands (FsArgs, JobsArgs).
    */
   
@@ -82,7 +63,7 @@ public class CommandLineMain {
         order = 0)
     public String fsArgs;
 
-    @Parameter(names = JOBS,
+    @Parameter(names = job,
         description = "Job commands",
         order = 1)
     public String jobsArgs;
@@ -253,7 +234,7 @@ public class CommandLineMain {
     JCommander jcJob = JCommander.newBuilder()
         .addObject(jobsArgs)
         .build();
-    jcJob.setProgramName("hops-cli " + JOBS);
+    jcJob.setProgramName("hops-cli " + job);
 
     JCommander jcFs = JCommander.newBuilder()
         .addObject(fsArgs)
