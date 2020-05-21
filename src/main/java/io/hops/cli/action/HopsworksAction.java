@@ -1,74 +1,61 @@
 package io.hops.cli.action;
 
-import io.hops.upload.beans.AuthData;
-import io.hops.upload.beans.Server;
-import io.hops.upload.cookie.CookieAuth;
-import org.apache.http.client.CookieStore;
+import io.hops.cli.config.HopsworksAPIConfig;
+import org.apache.commons.lang.SystemUtils;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
+
+import static org.apache.http.HttpHeaders.USER_AGENT;
 
 public abstract class HopsworksAction {
-  
-  private Server httpServer;
-  private AuthData authData;
-  
-  public HopsworksAction(String apiEndpoint, int port, boolean authentication, String path){
-    this.httpServer = new Server(apiEndpoint, port, authentication, path);
-  }
-  
-//  public void activateAuth(String email, String password, String authPath) {
-//    authData = new AuthData(email, password, authPath);
-//    httpServer.setAuthentication(true);
-//  }
-//
-//  public void activateAuth(String email, String password, String authPath, String jwt) {
-//    authData = new AuthData(email, password, authPath, jwt);
-//    httpServer.setAuthentication(true);
-//  }
 
-  public void activateAuth(String email, String apiKey) {
-    authData = new AuthData(email, apiKey);
-    httpServer.setAuthentication(true);
+  final HopsworksAPIConfig hopsworksAPIConfig;
+
+  public HopsworksAction(HopsworksAPIConfig hopsworksAPIConfig ){
+    this.hopsworksAPIConfig = hopsworksAPIConfig;
   }
 
+  public  String getProjectId(HopsworksAPIConfig apiConfig) throws IOException {
+    CloseableHttpClient client = getClient();
 
-//  public List<Cookie> auth() throws IOException {
-////    CookieAuth cookieAuth = new CookieAuth(httpServer.getAPIUrl() + authData.getAuthPath(),
-////      authData.getEmail(), authData.getPassword());
-//    CookieAuth cookieAuth = new CookieAuth(httpServer.getAPIUrl() + authData.getAuthPath(),
-//            authData.getEmail(),
-//            authData.getApiKey());
-////            authData.getEmail(), authData.getPassword());
-//    return cookieAuth.auth();
-//  }
-  
-  public HttpContext generateContextWithCookies(List<Cookie> cookies) {
-    CookieStore cookieStore = new BasicCookieStore();
-    for (int i = 0; i < cookies.size(); i++) {
-      cookieStore.addCookie(cookies.get(i));
+    HttpGet request = new HttpGet(apiConfig.getProjectNameUrl());
+    request.addHeader("User-Agent", USER_AGENT);
+    request.addHeader("Authorization", "ApiKey " + apiConfig.getApiKey());
+    HttpResponse response = client.execute(request);
+    BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+    StringBuilder result = new StringBuilder();
+    String line = "";
+    while ((line = rd.readLine()) != null) {
+      result.append(line);
     }
-    HttpContext localContext = new BasicHttpContext();
-    localContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
-    return localContext;
-    
+    JsonObject body = Json.createReader(new StringReader(result.toString())).readObject();
+    JsonValue projectId = body.get("projectId");
+    client.close();
+
+    return projectId.toString();
   }
 
-  protected HttpClient getClient() {
-    HttpClient getClient = null;
+  protected CloseableHttpClient getClient() throws IOException {
+    CloseableHttpClient  getClient = null;
     try {
       getClient = HttpClients
               .custom()
@@ -78,24 +65,30 @@ public abstract class HopsworksAction {
               .build();
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
+      throw new IOException(e.getMessage());
     } catch (KeyManagementException e) {
       e.printStackTrace();
+      throw new IOException(e.getMessage());
     } catch (KeyStoreException e) {
       e.printStackTrace();
+      throw new IOException(e.getMessage());
     }
     return getClient;
-
   }
 
+  public static URI pathToUri(String filePath) throws URISyntaxException {
+    URI uri;
+    // Default FS if not given, is the local FS (file://)
+    if (SystemUtils.IS_OS_WINDOWS && filePath.startsWith("file://") == false) {
+      uri = new URI("file:///" + filePath);
+    } else if (filePath.startsWith("/")) {
+      uri = new URI("file://" + filePath);
+    } else {
+      uri = new URI(filePath);
+    }
+    return uri;
+  }
 
-  public Server getHttpServer() {
-    return httpServer;
-  }
-  
-  public AuthData getAuthData() {
-    return authData;
-  }
-  
   /**
    * Send http request.
    *

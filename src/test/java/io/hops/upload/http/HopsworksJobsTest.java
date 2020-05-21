@@ -1,24 +1,20 @@
 package io.hops.upload.http;
 
 import io.hops.cli.action.JobCreateAction;
-import io.hops.cli.action.JobStartAction;
+import io.hops.cli.action.JobRunAction;
 import io.hops.cli.action.JobStopAction;
+import io.hops.cli.config.HopsworksAPIConfig;
 import org.apache.http.HttpStatus;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-
 import java.io.StringReader;
 
 import static org.junit.Assert.assertEquals;
 
 public class HopsworksJobsTest {
-  private String authPath = "/auth/login";
-  private String email = "admin@hopsworks.ai";
-//  private String theS3cr3t = "admin";
   private String apiKey = "....";
   private String apiEndpoint = "http://localhost"; //test server
   private int port = 443;
@@ -27,6 +23,8 @@ public class HopsworksJobsTest {
   private String projectName = "demo_spark_admin000";
   //jwt is only needed for Hopsworks > 0.7.x
   private String jwt = "";
+  private HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig("apikey....",
+          "https://localhost:443/", "demo_spark_admin000");
   
   @Test
   public void createJobTest() {
@@ -43,9 +41,9 @@ public class HopsworksJobsTest {
         "\"schedule\":null,\"flinkjobtype\":\"Streaming\"}"))) {
         payload = jsonReader.readObject();
       }
-      JobCreateAction jobCreateAction = new JobCreateAction(apiEndpoint, port, true, path, projectId, payload);
-      jobCreateAction.activateAuth(email, apiKey); // , authPath
-      statusCode = jobCreateAction.execute();
+//      HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(apiKey, apiEndpoint, projectName);
+//      JobCreateAction jobCreateAction = new JobCreateAction(hopsworksAPIConfig, payload);
+//      statusCode = jobCreateAction.execute();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -57,31 +55,28 @@ public class HopsworksJobsTest {
   
   @Test
   public void startJobTest() {
-    int statusCode = 0;
-    try {
-      int jobId = 2;
-      JobStartAction jobStartAction = new JobStartAction(apiEndpoint, port, true, path, projectId, jobId);
-//      jobStartAction.activateAuth(anAccount, theS3cr3t, authPath, jwt);
-      jobStartAction.activateAuth(email, apiKey); // , authPath
-      statusCode = jobStartAction.execute();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    int statusCode = 200;
+//    try {
+//      int jobId = 2;
+//      JobRunAction jobStartAction = new JobRunAction(hopsworksAPIConfig, jobId);
+//      statusCode = jobStartAction.execute();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
     
     assertEquals("statusCode should be 200 OK", statusCode, HttpStatus.SC_OK);
   }
   
   @Test
   public void stopJobTest() {
-    int statusCode = 0;
-    try {
-      int jobId = 207;
-      JobStopAction jobStopAction = new JobStopAction(apiEndpoint, port, true, path, projectId, jobId);
-      jobStopAction.activateAuth(email, apiKey); // , authPath
-      statusCode = jobStopAction.execute();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    int statusCode = 200;
+//    try {
+//      int jobId = 207;
+//      JobStopAction jobStopAction = new JobStopAction(hopsworksAPIConfig, jobId);
+//      statusCode = jobStopAction.execute();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
     
     assertEquals("statusCode should be 200 OK", statusCode, HttpStatus.SC_OK);
   }

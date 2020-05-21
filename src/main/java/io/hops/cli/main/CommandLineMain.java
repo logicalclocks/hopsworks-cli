@@ -3,12 +3,11 @@ package io.hops.cli.main;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import io.hops.cli.action.FileUploadAction;
 import io.hops.cli.config.HopsworksAPIConfig;
-import io.hops.upload.net.HTTPFileUpload;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -16,7 +15,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
@@ -30,7 +28,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.file.FileSystems;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -52,21 +49,11 @@ public class CommandLineMain {
 
   private static final String JOBS = "jobs";
   private static final String FS = "fs";
-  private static final String PROJECTS = "proj";
-  private static final String DATASETS = "ds";
 
-  private static final String HADOOP_HOME = "HADOOP_HOME";
-  private static final String HADOOP_CONF_DIR = "HADOOP_CONF_DIR";
-  private static final String HDFS_USER_NAME = "HDFS_USER_NAME";
   private static final String HOPSWORKS_PROJECT = "HOPSWORKS_PROJECT";
-  private static final String HOPSWORKS_EMAIL = "HOPSWORKS_EMAIL";
-  private static final String HOPSWORKS_PASSWORD = "HOPSWORKS_PASSWORD";
-  private static final String HOPSWORKS_CERT = "HOPSWORKS_CERT";
   private static final String HOPSWORKS_URL = "HOPSWORKS_URL";
-  private static final String STAGING_DIR = "STAGING_DIR";
   private static final String HOPSWORKS_APIKEY = "HOPSWORKS_APIKEY";
   private static final String path = "/hopsworks-api/api";
-//  private static final String authPath = "/auth/login";
 
   /**
    * *
@@ -75,20 +62,10 @@ public class CommandLineMain {
    * Environment variables take precedence over values in hops.properties.
    */
   private static final Properties props = new Properties();
-  public static String hadoopHome;
-  public static String hadoopConfDir;
-  public static String hdfsUsername;
   public static String project;
-  public static String email;
-  public static String password;
-  public static String hopsCert;
   public static String hopsworksUrl;
-  public static String stagingDir;
   public static String hopsworksApiKey;
-  public static HTTPFileUpload httpFileUpload = null;
 
-  ;
-  
   /**
    * There are 2 levels of commands.
    * 1. The top level commands (Args) - fs, jobs
@@ -219,8 +196,6 @@ public class CommandLineMain {
               .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
               .build();
 
-//      CloseableHttpClient httpclient = HttpClients.createDefault();
-//      try {
         HttpPost httppost = new HttpPost("https://35.185.114.183/hopsworks-api/api/project/119/" +
                 "dataset/upload/Resources");
 
@@ -241,9 +216,7 @@ public class CommandLineMain {
         httppost.setEntity(reqEntity);
 
         System.out.println("executing request " + httppost.getRequestLine());
-//        CloseableHttpResponse response = httpclient.execute(httppost);
         HttpResponse response = httpclient.execute(httppost);
-//        try {
           System.out.println("----------------------------------------");
           System.out.println(response.getStatusLine());
           HttpEntity resEntity = response.getEntity();
@@ -251,13 +224,6 @@ public class CommandLineMain {
             System.out.println("ToString:" + EntityUtils.toString(resEntity));
           }
           EntityUtils.consume(resEntity);
-//        } finally {
-//          response.close();
-//        }
-//      } finally {
-//        httpclient.close();
-//      }
-
 
     }
   }
@@ -267,35 +233,10 @@ public class CommandLineMain {
 
     System.setProperty("java.net.preferIPv4Stack", "true");
 
-//    try {
-//      Test.exec();
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//    } catch (NoSuchAlgorithmException e) {
-//      e.printStackTrace();
-//    } catch (KeyStoreException e) {
-//      e.printStackTrace();
-//    } catch (KeyManagementException e) {
-//      e.printStackTrace();
-//    }
-//    System.exit(0);
-
-
-
-    // Priority for configuration variables/args (1 is highest, 3 is lowest): 
+    // Priority for configuration variables/args (1 is highest, 3 is lowest):
     // 1. Command Line > 2. Environment Variables > 3. conf/hops.properties
-    hadoopHome = System.getenv().get(HADOOP_HOME);
-    hadoopConfDir = System.getenv().get(HADOOP_CONF_DIR);
-    if (hadoopConfDir == null && hadoopHome != null) {
-      hadoopConfDir = hadoopHome + "/etc/hadoop";
-    }
-    hdfsUsername = System.getenv().get(HDFS_USER_NAME);
     project = System.getenv().get(HOPSWORKS_PROJECT);
-    email = System.getenv().get(HOPSWORKS_EMAIL);
-    password = System.getenv().get(HOPSWORKS_PASSWORD);
-    hopsCert = System.getenv().get(HOPSWORKS_CERT);
     hopsworksUrl = System.getenv().get(HOPSWORKS_URL);
-    stagingDir = System.getenv().get(STAGING_DIR);
     hopsworksApiKey = System.getenv().get(HOPSWORKS_APIKEY);
 
     Args a = new Args();
@@ -326,20 +267,9 @@ public class CommandLineMain {
 
     try {
       props.load(new FileInputStream(configFile));
-      hadoopHome = CommandLineMain.getProperty(hadoopHome, HADOOP_HOME);
-      hadoopConfDir = CommandLineMain.getProperty(hadoopConfDir, HADOOP_CONF_DIR);
-      if ((hadoopConfDir == null || hadoopConfDir.isEmpty() == true) && hadoopHome != null) {
-        hadoopConfDir = hadoopHome + "/etc/hadoop";
-      }
-      hdfsUsername = CommandLineMain.getProperty(hdfsUsername, HDFS_USER_NAME);
       project = CommandLineMain.getProperty(project, HOPSWORKS_PROJECT);
-      email = CommandLineMain.getProperty(email, HOPSWORKS_EMAIL);
-      password = CommandLineMain.getProperty(password, HOPSWORKS_PASSWORD);
-      hopsCert = CommandLineMain.getProperty(hopsCert, HOPSWORKS_CERT);
       hopsworksUrl = CommandLineMain.getProperty(hopsworksUrl, HOPSWORKS_URL);
-      stagingDir = CommandLineMain.getProperty(stagingDir, STAGING_DIR);
       hopsworksApiKey = CommandLineMain.getProperty(hopsworksApiKey, HOPSWORKS_APIKEY);
-
     } catch (IOException ex) {
       System.err.println("Problem reading/parsing the conf/hops.properties file.");
       System.exit(-1);
@@ -415,17 +345,12 @@ public class CommandLineMain {
         if (fsArgs.copyFromLocal != null) {
           String relativePath = fsArgs.copyFromLocal.get(0);
 //          String absolutePath = FileSystems.getDefault().getPath(relativePath).normalize().toAbsolutePath().toString();
-          String absolutePath = relativePath;
           String datasetPath = fsArgs.copyFromLocal.get(1);
 
-          httpFileUpload = new HTTPFileUpload("https://" + address.getHostAddress(), port, true, path);
-//          httpFileUpload = new HTTPFileUpload("http://" + hostname, port, true, path);
-//          httpFileUpload.activateAuth(email, password, authPath);
-          httpFileUpload.activateAuth(email, hopsworksApiKey); //, authPath
           try {
-//            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(email, password, hopsworksUrl, project);
-            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(email, hopsworksApiKey, hopsworksUrl, project);
-            httpFileUpload.uploadFile(absolutePath, datasetPath, hopsworksAPIConfig);
+            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig( hopsworksApiKey, hopsworksUrl, project);
+            FileUploadAction action = new FileUploadAction(hopsworksAPIConfig, datasetPath, relativePath);
+            action.execute();
           } catch (IOException ex) {
             Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
             jc.usage();
@@ -434,10 +359,12 @@ public class CommandLineMain {
             Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
             jc.usage();
             System.exit(1);
+          } catch (Exception ex) {
+            Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
+            jc.usage();
+            ex.printStackTrace();
+            System.exit(1);
           }
-//        } else if (fsArgs.copyFromHdfs != null) {
-//          String hdfsPath = fsArgs.copyFromHdfs.get(0);
-//          String uploadPath = fsArgs.copyFromHdfs.get(1);
 
         }
 

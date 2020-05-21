@@ -1,15 +1,7 @@
 package io.hops.upload.auth;
 
-import io.hops.upload.cookie.CookieAuth;
 import io.hops.cli.config.HopsworksAPIConfig;
-import org.apache.http.cookie.Cookie;
 import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 public class HopsworksAuthTest {
 
@@ -19,13 +11,10 @@ public class HopsworksAuthTest {
     public void setUp(){
 
         String url = "http://bbc3.sics.se:21756/hopsworks-api/api";  //test server
-        String anAccount = "admin@hopsworks.ai";
-        String k3y = "admin";
         String apiKey = "admin";
         String projectName = "test";
 
-        this.hopsworksAPIConfig = new HopsworksAPIConfig(anAccount, apiKey,url, projectName);
-//        this.hopsworksAPIConfig = new HopsworksAPIConfig(anAccount,k3y,url, projectName);
+        this.hopsworksAPIConfig = new HopsworksAPIConfig(apiKey,url, projectName);
 
     }
 

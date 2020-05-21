@@ -1,11 +1,13 @@
 package io.hops.cli.action;
 
+import io.hops.cli.config.HopsworksAPIConfig;
+
 import java.io.IOException;
 
 public class CreateDataSetAction extends HopsworksAction {
     
-    public CreateDataSetAction(String apiEndpoint, int port, boolean authentication, String path) {
-        super(apiEndpoint, port, authentication, path);
+    public CreateDataSetAction(HopsworksAPIConfig hopsworksAPIConfig, String path) {
+        super(hopsworksAPIConfig);
     }
     
     @Override

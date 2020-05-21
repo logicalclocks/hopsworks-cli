@@ -9,25 +9,18 @@ import java.util.logging.Logger;
 
 public class HopsworksAPIConfig {
 
-  private String email;
-//  private String password;
   private String apiKey;
   private String apiUrl;
   private String projectName;
 
   private URL url;
 
-  private final String DEFAULT_PATH_FILE_UPLOAD = "/project/{id}/dataset/{fileName}";
-//  private final String DEFAULT_PATH_LOGIN = "/auth/login";
+  private final String baseUrl = "/hopsworks-api/api";
 
-//  private String pathLogin;
+  private final String DEFAULT_PATH_FILE_UPLOAD = "/project/{id}/dataset/{fileName}";
   private String pathFileUpload;
 
-//  public HopsworksAPIConfig(String userName, String password, String apiUrl, String projectName) {
-  public HopsworksAPIConfig(String email, String apiKey, String apiUrl, String projectName) {
-//    this.userName = userName;
-//    this.password = password;
-    this.email = email;
+  public HopsworksAPIConfig( String apiKey, String apiUrl, String projectName) {
     this.apiKey = apiKey;
     this.apiUrl = apiUrl;
 
@@ -39,14 +32,9 @@ public class HopsworksAPIConfig {
       e.printStackTrace();
     }
 
-//    this.pathLogin = this.DEFAULT_PATH_LOGIN;
     this.pathFileUpload = this.DEFAULT_PATH_FILE_UPLOAD;
 
   }
-
-//  public String getPathLogin() {
-//    return pathLogin;
-//  }
 
   public String getPathFileUpload() {
     return pathFileUpload;
@@ -55,28 +43,6 @@ public class HopsworksAPIConfig {
   public void setPathFileUpload(String pathFileUpload) {
     this.pathFileUpload = pathFileUpload;
   }
-
-//  public void setPathLogin(String pathLogin) {
-//    this.pathLogin = pathLogin;
-//  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  //
-//  public String getPassword() {
-//    return password;
-//  }
-//
-//  public void setPassword(String password) {
-//    this.password = password;
-//  }
-
 
   public String getApiKey() {
     return apiKey;
@@ -119,11 +85,14 @@ public class HopsworksAPIConfig {
   }
 
   public String getProjectUrl() {
-      return  this.apiUrl + "/hopsworks-api/api/project/";
+      return  getApiUrl() + getBaseUrl() + "/project/";
   }
   
   public String getProjectNameUrl() {
       return  getProjectUrl() + "getProjectInfo/" + projectName;
   }
 
+  public String getBaseUrl() {
+    return baseUrl;
+  }
 }
