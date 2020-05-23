@@ -10,6 +10,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
@@ -24,12 +26,29 @@ public class FileUploadAction extends HopsworksAction {
 
   private String hopsworksFolder;
   private URI filePath;
+  private boolean overwrite = true;
+  private String projectId;
 
   private static final Logger logger = LoggerFactory.getLogger(FileUploadAction.class);
 
   public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder, String filePath) throws URISyntaxException {
     super(hopsworksAPIConfig);
     this.init(hopsworksFolder, filePath);
+  }
+
+  /**
+   *
+   * @param hopsworksAPIConfig
+   * @param hopsworksFolder
+   * @param filePath
+   * @param overwrite
+   * @throws URISyntaxException
+   */
+  public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder, String filePath,
+                          boolean overwrite) throws URISyntaxException {
+    super(hopsworksAPIConfig);
+    this.init(hopsworksFolder, filePath);
+    this.overwrite = overwrite;
   }
 
   public FileUploadAction(HopsworksAPIConfig hopsworksAPIConfig, String hopsworksFolder, URI filePath) {
@@ -66,6 +85,12 @@ public class FileUploadAction extends HopsworksAction {
   @Override
   public int execute() throws Exception {
     int statusCode;
+    projectId = getProjectId();
+
+    if (overwrite) {
+
+    }
+
 //    String completeUploadPath = generateUploadPath();
       statusCode = uploadFile(this.filePath, this.hopsworksFolder, this.hopsworksAPIConfig);
     if (statusCode != HttpStatus.SC_OK) {
@@ -74,12 +99,25 @@ public class FileUploadAction extends HopsworksAction {
     return statusCode;
   }
 
+  private void deleteFile(String datasetPath, HopsworksAPIConfig apiConfig, String targetFileName) throws
+          IOException {
+    String apiUrl = apiConfig.getProjectUrl() + projectId + "/dataset/" + datasetPath + "/" + targetFileName;
+    CloseableHttpClient client = getClient();
+    try {
+      final HttpDelete delete = new HttpDelete(apiUrl);
+      delete.addHeader("Authorization", "ApiKey " + apiConfig.getApiKey());
+      CloseableHttpResponse response = client.execute(delete);
+      response.close();
+    } catch (Exception ex) {
+      ; // ignore
+    } finally {
+      client.close();
+    }
+  }
 
-
-  private int startUploadFile(URI fileUri, String datasetPath, HopsworksAPIConfig apiConfig, String targetFileName) throws
+    private int startUploadFile(URI fileUri, String datasetPath, HopsworksAPIConfig apiConfig, String targetFileName) throws
           IOException {
 
-    String projectId = getProjectId(apiConfig);
     String apiUrl = apiConfig.getProjectUrl() + projectId  + "/dataset/upload/" + datasetPath;
     CloseableHttpClient client = getClient();
     final HttpPost post = new HttpPost(apiUrl);
@@ -102,10 +140,8 @@ public class FileUploadAction extends HopsworksAction {
   }
 
   private int uploadFile(URI uri, String datasetPath, HopsworksAPIConfig apiConfig) throws IOException {
-
     Path path = new Path(uri);
     String targetFileName = path.getName();
-
     return this.startUploadFile(uri, datasetPath, apiConfig, targetFileName);
   }
 

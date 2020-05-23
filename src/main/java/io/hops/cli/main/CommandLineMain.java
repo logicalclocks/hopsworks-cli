@@ -3,15 +3,11 @@ package io.hops.cli.main;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import io.hops.cli.action.FileUploadAction;
+import io.hops.cli.action.*;
 import io.hops.cli.config.HopsworksAPIConfig;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -21,301 +17,217 @@ import java.util.logging.Logger;
  * *
  * <p>
  * Resources:
- *  * https://starkandwayne.com/blog/working-with-hdfs/
- *  * https://github.com/Microsoft/hdfs-mount
+ * * https://starkandwayne.com/blog/working-with-hdfs/
+ * * https://github.com/Microsoft/hdfs-mount
  * <p>
  * <p>
  */
 public class CommandLineMain {
 
-  private static final String job = "job";
-  private static final String FS = "fs";
+    private static final String HOPSWORKS_PROJECT = "HOPSWORKS_PROJECT";
+    private static final String HOPSWORKS_URL = "HOPSWORKS_URL";
+    private static final String HOPSWORKS_APIKEY = "HOPSWORKS_APIKEY";
+    /**
+     * *
+     * These properties come either from environment variables or from
+     * properties set in the conf/hops.properties file.
+     * Environment variables take precedence over values in hops.properties.
+     */
+    private static final Properties props = new Properties();
+    public static String project;
+    public static String hopsworksUrl;
+    public static String hopsworksApiKey;
 
-  private static final String HOPSWORKS_PROJECT = "HOPSWORKS_PROJECT";
-  private static final String HOPSWORKS_URL = "HOPSWORKS_URL";
-  private static final String HOPSWORKS_APIKEY = "HOPSWORKS_APIKEY";
-  private static final String path = "/hopsworks-api/api";
+    /**
+     * There are 2 levels of commands.
+     * 1. The top level commands (Args) - fs, jobs
+     * 2. Sub-commands for each of the top-level commands (FsArgs, JobsArgs).
+     */
 
-  /**
-   * *
-   * These properties come either from environment variables or from
-   * properties set in the conf/hops.properties file.
-   * Environment variables take precedence over values in hops.properties.
-   */
-  private static final Properties props = new Properties();
-  public static String project;
-  public static String hopsworksUrl;
-  public static String hopsworksApiKey;
+    public static class Args {
+        @Parameter(names = "-conf",
+                description = "Location of hops.properties config file",
+                order = 1)
+        public String conf = "conf/hops.properties";
 
-  /**
-   * There are 2 levels of commands.
-   * 1. The top level commands (Args) - fs, job
-   * 2. Sub-commands for each of the top-level commands (FsArgs, JobsArgs).
-   */
-  
-  public static class Args {
+        @Parameter(names = "-proj",
+                description = "Name of the project",
+                order = 2)
+        public String project;
 
-    @Parameter(description = "")
-    public List<String> mainArgs;
+        @Parameter(names = "-help",
+                description = "Usage of hops-cli",
+                help = true,
+                order = 3)
+        public boolean help;
 
-    @Parameter(names = FS,
-        description = "Filesystem commands",
-        order = 0)
-    public String fsArgs;
+        @Parameter(names = "-cp",
+                arity = 2,
+                description = "Copy a file from the local filesystem to the remote",
+                order = 4)
+        public List<String> cp;
 
-    @Parameter(names = job,
-        description = "Job commands",
-        order = 1)
-    public String jobsArgs;
+        @Parameter(names = "-add-job",
+                description = "Create a Job with a python file (.py), notebook (.ipynb) or a jar file (.jar).",
+                order = 5)
+        public String addJob;
 
-    @Parameter(names = "-conf",
-        description = "Location of hops.properties config file",
-        order = 2)
-    public String conf = "conf/hops.properties";
+        @Parameter(names = "-start-job",
+                description = "Run a job with this name",
+                order = 6)
+        public String execJob;
 
-    @Parameter(names = "-proj",
-        description = "Name of the project",
-        order = 3)
-    public String project;
+        @Parameter(names = "-rm-job",
+                description = "Remove a job with given name.",
+                order = 7)
+        public String rmJob;
 
-    @Parameter(names = "-help",
-        description = "Usage of hops-cli",
-        help = true,
-        order = 4)
-    public boolean help;
-  }
+        @Parameter(names = "-logs-job",
+                description = "Download the latest logs for a job with given name.",
+                order = 8)
+        public String logsJob;
 
-  public static class JobsArgs {
-
-    @Parameter(names = "create",
-        description = "Create a Job with a python file (.py), notebook (.ipynb) or a jar file (.jar).")
-    public String create;
-
-    @Parameter(names = "run",
-            description = "Run a Job with a given name.")
-    public String run;
-
-    @Parameter(names = "remove",
-        description = "Remove a job with given name.")
-    public int remove;
-
-    @Parameter(names = "logs",
-        description = "Download the latest logs for a job with given name.")
-    public int logs;
-
-    @Parameter(names = "-name",
-        description = "Job ")
-    public String jobName = "hops-cli";
-    @Parameter(names = "--driver-memory",
-        description = "Job ")
-    public String driverMemory = "1024M";
-    @Parameter(names = "--driver-cores",
-        description = "Job ")
-    public String driverCores = "1";
-    @Parameter(names = "--num-executors",
-        description = "")
-    public String numExecutors = "1";
-    @Parameter(names = "--spark-properties",
-        description = "")
-    public String SparkProps = "";
-    @Parameter(names = "--executor-memory",
-        description = "")
-    public String executorMemory = "2048M";
-    @Parameter(names = "--executor-cores",
-        description = "")
-    public String executorCores = "4";
-    @Parameter(names = "--executor-gpus",
-        description = "")
-    public String executorGpus = "0";
-
-  }
-
-  public static class FsArgs {
-
-//    @Parameter(names = "-ls",
-//        description = "List files/dirs in the given path")
-//    public String lsPath;
-//
-//    @Parameter(names = "-rm",
-//        description = "Remove a files in the given path")
-//    public String rmPath;
-//
-//    @Parameter(names = "-mkdir",
-//        description = "Make a directory in the given path")
-//    public String mkdirPath;
-
-    @Parameter(names = "cp",
-        arity = 2,
-        description = "Copy a file from the local filesystem to the remote")
-    public List<String> copyFromLocal;
-
-//    @Parameter(names = "-copyToLocal",
-//        arity = 2,
-//        description = "Copy a file from the local filesystem to the remote")
-//    public List<String> copyToLocal;
-//
-//    @Parameter(names = "-copyFromHdfs",
-//        arity = 2,
-//        description = "Copy a file from a local HDFS/HopsFS cluster to a remote Hops cluster")
-//    public List<String> copyFromHdfs;
-
-  }
-
-  private static String getProperty(String variable, String env) throws Exception {
-    if (variable == null) {
-      variable = props.getProperty(env);
-    }
-    return variable;
-
-  }
+        @Parameter(names = "-stop-job",
+                description = "Stops a job with this name and the latest execution id",
+                order = 9)
+        public String stopJob;
 
 
-  public static void main(String[] args) {
+        @Parameter(names = "--user-args",
+                description = "Job run arguments",
+                order = 10)
+        public String userArgs = "";
 
-    System.setProperty("java.net.preferIPv4Stack", "true");
+        /** Job run parameters **/
+        @Parameter(names = "--driver-memory",
+                description = "Driver memory",
+                order = 11)
+        public String driverMemory = "1024M";
 
-    // Priority for configuration variables/args (1 is highest, 3 is lowest):
-    // 1. Command Line > 2. Environment Variables > 3. conf/hops.properties
-    project = System.getenv().get(HOPSWORKS_PROJECT);
-    hopsworksUrl = System.getenv().get(HOPSWORKS_URL);
-    hopsworksApiKey = System.getenv().get(HOPSWORKS_APIKEY);
+        @Parameter(names = "--driver-cores",
+                description = "Driver number of CPU cores ",
+                order = 12)
+        public String driverCores = "1";
 
-    Args a = new Args();
-    JCommander jc = JCommander.newBuilder()
-        .addObject(a)
-        .build();
-    jc.setProgramName("hops-cli");
+        @Parameter(names = "--num-executors",
+                description = "Number of executors",
+                order = 13)
+        public String numExecutors = "1";
 
-    if (args.length == 0) {
-      jc.usage();
-      System.exit(0);
-    }
+        @Parameter(names = "--spark-properties",
+                description = "Spark conf propertie",
+                order = 14)
+        public String sparkProps = "";
 
-    try {
-      jc.parse(args);
-    } catch (ParameterException ex) {
-      jc.usage();
-      System.exit(0);
+        @Parameter(names = "--executor-memory",
+                description = "Executor memory",
+                order = 15)
+        public String executorMemory = "2048M";
+
+        @Parameter(names = "--executor-cores",
+                description = "Number of CPU cores per executor",
+                order = 16)
+        public String executorCores = "1";
+
+        @Parameter(names = "--executor-gpus",
+                description = "Number of GPUs per executor",
+                order = 17)
+        public String executorGpus = "0";
 
     }
 
-    if (a.help) {
-      jc.usage();
-      System.exit(1);
-    }
 
-    String configFile = a.conf;
-
-    try {
-      props.load(new FileInputStream(configFile));
-      project = CommandLineMain.getProperty(project, HOPSWORKS_PROJECT);
-      hopsworksUrl = CommandLineMain.getProperty(hopsworksUrl, HOPSWORKS_URL);
-      hopsworksApiKey = CommandLineMain.getProperty(hopsworksApiKey, HOPSWORKS_APIKEY);
-    } catch (IOException ex) {
-      System.err.println("Problem reading/parsing the conf/hops.properties file.");
-      System.exit(-1);
-    } catch (Exception ex) {
-      Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
-      System.exit(-1);
-    }
-
-    if (a.project != null) {
-      project = a.project;
-    }
-    // Only one of the top-level commands should be active (not allowed -> both null, both non-null)
-    if ((a.jobsArgs == null && a.fsArgs == null) || (a.jobsArgs != null && a.fsArgs != null)) {
-      jc.usage();
-      System.exit(1);
-    }
-
-    JobsArgs jobsArgs = new JobsArgs();
-    FsArgs fsArgs = new FsArgs();
-
-    JCommander jcJob = JCommander.newBuilder()
-        .addObject(jobsArgs)
-        .build();
-    jcJob.setProgramName("hops-cli " + job);
-
-    JCommander jcFs = JCommander.newBuilder()
-        .addObject(fsArgs)
-        .build();
-    jcFs.setProgramName("hops-cli " + FS);
-
-    
-    try {
-      if (a.jobsArgs != null) {
-        JCommander jcJobs = JCommander.newBuilder()
-            .addObject(jobsArgs)
-            .build();
-        jcJobs.setProgramName("jobs");
-
-        if (a.mainArgs == null) {
-          jcJob.usage();
-          System.exit(2);
+    private static String getProperty(String variable, String env) throws Exception {
+        if (variable == null) {
+            variable = props.getProperty(env);
         }
-        a.mainArgs.add(0, a.jobsArgs);
-        String[] commandArgs = a.mainArgs.toArray(new String[0]);
-        jcJobs.parse(commandArgs);
-      } else if (a.fsArgs != null) {
-        if (a.mainArgs == null) {
-          jcFs.usage();
-          System.exit(2);
+        return variable;
+
+    }
+
+
+    public static void main(String[] args) {
+
+        System.setProperty("java.net.preferIPv4Stack", "true");
+
+        // Priority for configuration variables/args (1 is highest, 3 is lowest):
+        // 1. Command Line > 2. Environment Variables > 3. conf/hops.properties
+        project = System.getenv().get(HOPSWORKS_PROJECT);
+        hopsworksUrl = System.getenv().get(HOPSWORKS_URL);
+        hopsworksApiKey = System.getenv().get(HOPSWORKS_APIKEY);
+
+        Args a = new Args();
+        JCommander jc = JCommander.newBuilder()
+                .addObject(a)
+                .build();
+        jc.setProgramName("hops-cli");
+
+        if (args.length == 0) {
+            jc.usage();
+            System.exit(0);
         }
-        a.mainArgs.add(0, a.fsArgs);
-        String[] commandArgs = a.mainArgs.toArray(new String[0]);
-        jcFs.parse(commandArgs);
 
         try {
-          new URL(hopsworksUrl);
-        } catch (MalformedURLException ex) {
-          Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
-          jc.usage();
-          System.exit(1);
+            jc.parse(args);
+        } catch (ParameterException ex) {
+            jc.usage();
+            System.exit(0);
+
         }
 
-        if (fsArgs.copyFromLocal != null) {
-          String relativePath = fsArgs.copyFromLocal.get(0);
-//          String absolutePath = FileSystems.getDefault().getPath(relativePath).normalize().toAbsolutePath().toString();
-          String datasetPath = fsArgs.copyFromLocal.get(1);
+        if (a.help) {
+            jc.usage();
+            System.exit(1);
+        }
 
-          try {
-            HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig( hopsworksApiKey, hopsworksUrl, project);
-            FileUploadAction action = new FileUploadAction(hopsworksAPIConfig, datasetPath, relativePath);
+        String configFile = a.conf;
+
+        try {
+            props.load(new FileInputStream(configFile));
+            project = CommandLineMain.getProperty(project, HOPSWORKS_PROJECT);
+            hopsworksUrl = CommandLineMain.getProperty(hopsworksUrl, HOPSWORKS_URL);
+            hopsworksApiKey = CommandLineMain.getProperty(hopsworksApiKey, HOPSWORKS_APIKEY);
+        } catch (IOException ex) {
+            System.err.println("Problem reading/parsing the conf/hops.properties file.");
+            System.exit(-1);
+        } catch (Exception ex) {
+            Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(-1);
+        }
+
+        if (a.project != null) {
+            project = a.project;
+        }
+
+        HopsworksAPIConfig hopsworksAPIConfig = new HopsworksAPIConfig(hopsworksApiKey, hopsworksUrl, project);
+
+        try {
+            HopsworksAction action=null;
+            if (a.cp != null) {
+                String relativePath = a.cp.get(0);
+//          String absolutePath = FileSystems.getDefault().getPath(relativePath).normalize().toAbsolutePath().toString();
+                String datasetPath = a.cp.get(1);
+                action = new FileUploadAction(hopsworksAPIConfig, datasetPath, relativePath);
+            } else if (a.addJob != null) {
+                action = new JobCreateAction(hopsworksAPIConfig, a.addJob);
+            } else if (a.rmJob != null) {
+                action = new JobRemoveAction(hopsworksAPIConfig, a.rmJob);
+            } else if (a.logsJob != null) {
+                action = new JobLogsAction(hopsworksAPIConfig, a.logsJob);
+            } else if (a.execJob != null) {
+                action = new JobRunAction(hopsworksAPIConfig, a.execJob, a.userArgs);
+            } else if (a.stopJob != null) {
+                action = new JobStopAction(hopsworksAPIConfig, a.stopJob);
+            }
             action.execute();
-          } catch (IOException ex) {
-            Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
-            jc.usage();
-            System.exit(1);
-          } catch (URISyntaxException ex) {
-            Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
-            jc.usage();
-            System.exit(1);
-          } catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
             jc.usage();
             ex.printStackTrace();
             System.exit(1);
-          }
-
         }
 
-      } else {
-        jc.usage();
-        System.exit(1);
-      }
-    } catch (ParameterException ex) {
-      jc.usage();
-      System.exit(2);
-    }
 
-    URI uri = null;
-    try {
-      uri = new URI(hopsworksUrl);
-    } catch (URISyntaxException ex) {
-      Logger.getLogger(CommandLineMain.class.getName()).log(Level.SEVERE, null, ex);
-      System.exit(-2);
     }
-
-  }
 
 }

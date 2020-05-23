@@ -29,17 +29,21 @@ import static org.apache.http.HttpHeaders.USER_AGENT;
 public abstract class HopsworksAction {
 
   final HopsworksAPIConfig hopsworksAPIConfig;
+  private String projectId;
 
   public HopsworksAction(HopsworksAPIConfig hopsworksAPIConfig ){
     this.hopsworksAPIConfig = hopsworksAPIConfig;
   }
 
-  public  String getProjectId(HopsworksAPIConfig apiConfig) throws IOException {
+  public  String getProjectId() throws IOException {
+    if (this.projectId != null) {
+      return this.projectId;
+    }
     CloseableHttpClient client = getClient();
 
-    HttpGet request = new HttpGet(apiConfig.getProjectNameUrl());
+    HttpGet request = new HttpGet(this.hopsworksAPIConfig.getProjectNameUrl());
     request.addHeader("User-Agent", USER_AGENT);
-    request.addHeader("Authorization", "ApiKey " + apiConfig.getApiKey());
+    request.addHeader("Authorization", "ApiKey " + this.hopsworksAPIConfig.getApiKey());
     HttpResponse response = client.execute(request);
     BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
     StringBuilder result = new StringBuilder();
@@ -48,10 +52,11 @@ public abstract class HopsworksAction {
       result.append(line);
     }
     JsonObject body = Json.createReader(new StringReader(result.toString())).readObject();
-    JsonValue projectId = body.get("projectId");
+    JsonValue projectIdJson = body.get("projectId");
     client.close();
 
-    return projectId.toString();
+    this.projectId = projectIdJson.toString();
+    return this.projectId;
   }
 
   protected CloseableHttpClient getClient() throws IOException {

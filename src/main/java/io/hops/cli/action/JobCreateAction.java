@@ -140,42 +140,33 @@ public class JobCreateAction extends JobAction {
   private static final Logger logger = LoggerFactory.getLogger(JobCreateAction.class);
   
   private JsonObject payload;
-  
+
   public JobCreateAction(HopsworksAPIConfig hopsworksAPIConfig, String jobName) {
+    this(hopsworksAPIConfig, jobName, new Args());
+  }
+
+  public JobCreateAction(HopsworksAPIConfig hopsworksAPIConfig, String jobName, Args args) {
     super(hopsworksAPIConfig, jobName);
 
-    Args args = new Args();
     JsonObjectBuilder objectBuilder = Json.createObjectBuilder()
             .add("numExecutors", args.getNumExecutors())
             .add("cpusPerExecutor", args.getCpusPerExecutor());
-//            .add("birthdate", new SimpleDateFormat("DD/MM/YYYY")
-//                    .format(args.getBirthdate()));
-
     this.payload = objectBuilder.build();
   }
   
   @Override
   public int execute() throws Exception {
     CloseableHttpClient getClient = getClient();
-    HttpPut request = new HttpPut(getJobUrl());
+    HttpPut request = new HttpPut(getJobUrl() + "/" + getJobName());
     request.addHeader("User-Agent", USER_AGENT);
     request.addHeader("Authorization", "ApiKey " + hopsworksAPIConfig.getApiKey());
     request.setHeader("Accept", "application/json");
     request.setHeader("Content-type", "application/json");
-
     StringEntity entity = new StringEntity(payload.toString());
     request.setEntity(entity);
-
     CloseableHttpResponse response = getClient.execute(request);
-    BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-    StringBuilder result = new StringBuilder();
-    String line = "";
-    while ((line = rd.readLine()) != null) {
-      result.append(line);
-    }
-    JsonObject body = Json.createReader(new StringReader(result.toString())).readObject();
-    logger.info("create job: " + body.toString());
+    int status = readJsonRepoonse(response);
     response.close();
-    return response.getStatusLine().getStatusCode();
+    return status;
   }
 }
