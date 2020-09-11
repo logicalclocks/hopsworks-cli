@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.hops</groupId>
   <artifactId>hopsworks-cli</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>hopsworks-cli</name>
@@ -20,8 +20,8 @@
   <developers>
     <developer>
       <name>Jim Dowling</name>
-      <email>jdowling@kth.se</email>
-      <organization>KTH University</organization>
+      <email>jim@logicalclocks.com</email>
+      <organization>Logical Clocks AB</organization>
     </developer>
     <developer>
       <name>Fabien Kirstein</name>
@@ -56,6 +56,11 @@
 
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.8.1</version>
+    </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
@@ -102,19 +107,13 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5</version>
+      <version>4.5.8</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpmime</artifactId>
       <version>4.5</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.4</version>
-    </dependency>
-    
     <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>

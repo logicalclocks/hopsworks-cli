@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
+VERSION=`grep -o -a -m 1 -h -r "version>.*</version" ../pom.xml | head -1 | sed "s/version//g" | sed "s/>//" | sed "s/<\///g"`
 
-gpg2 -ab target/hopsworks-cli-0.1-shaded.jar
-gpg2 --verify target/hopsworks-cli-0.1-shaded.jar.asc
+gpg2 -ab target/hopsworks-cli-${VERSION}-shaded.jar
+gpg2 --verify target/hopsworks-cli-${VERSION}-shaded.jar.asc
 

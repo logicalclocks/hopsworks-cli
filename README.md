@@ -54,6 +54,6 @@ Return application_attempt_id and jobId
 
 # Acknowledgement
 
-This work was developed as part of the Aegis BigData EU project, and it builds on earlier work done in the Aegis project: https://github.com/aegisbigdata/hopsworks-data-connector
+This work was developed as part of the Streamline EU Project and it builds on earlier work done in the Aegis project: https://github.com/aegisbigdata/hopsworks-data-connector
 https://www.aegis-bigdata.eu/
 

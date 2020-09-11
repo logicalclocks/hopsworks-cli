@@ -9,24 +9,21 @@ import java.util.logging.Logger;
 
 public class HopsworksAPIConfig {
 
-  private String userName;
-  private String password;
+  private String apiKey;
   private String apiUrl;
   private String projectName;
 
   private URL url;
 
-  private final String DEFAULT_PATH_FILE_UPLOAD = "/project/{id}/dataset/{fileName}";
-  private final String DEFAULT_PATH_LOGIN = "/auth/login";
+  private final String baseUrl = "/hopsworks-api/api";
 
-  private String pathLogin;
+  private final String DEFAULT_PATH_FILE_UPLOAD = "/project/{id}/dataset/{fileName}";
   private String pathFileUpload;
 
-  public HopsworksAPIConfig(String userName, String password, String apiUrl, String projectName) {
-    this.userName = userName;
-    this.password = password;
+  public HopsworksAPIConfig( String apiKey, String apiUrl, String projectName) {
+    this.apiKey = apiKey;
     this.apiUrl = apiUrl;
-    
+
     this.projectName = projectName;
 
     try {
@@ -35,13 +32,8 @@ public class HopsworksAPIConfig {
       e.printStackTrace();
     }
 
-    this.pathLogin = this.DEFAULT_PATH_LOGIN;
     this.pathFileUpload = this.DEFAULT_PATH_FILE_UPLOAD;
-    
-  }
 
-  public String getPathLogin() {
-    return pathLogin;
   }
 
   public String getPathFileUpload() {
@@ -52,24 +44,12 @@ public class HopsworksAPIConfig {
     this.pathFileUpload = pathFileUpload;
   }
 
-  public void setPathLogin(String pathLogin) {
-    this.pathLogin = pathLogin;
+  public String getApiKey() {
+    return apiKey;
   }
 
-  public String getUserName() {
-    return userName;
-  }
-
-  public void setUserName(String userName) {
-    this.userName = userName;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
+  public void setApiKey(String apiKey) {
+    this.apiKey = apiKey;
   }
 
   public String getApiUrl() {
@@ -83,7 +63,7 @@ public class HopsworksAPIConfig {
   public int getPort() {
     int port = this.url.getPort();
     if (port == -1) {
-      return 80; //no specific port in the url means standard port 80
+      return 443; //no specific port in the url means standard port 80
     }
     return port;
   }
@@ -105,18 +85,14 @@ public class HopsworksAPIConfig {
   }
 
   public String getProjectUrl() {
-//    try {
-//      return  "http://" + getHost() + ":" + getPort() + "/hopsworks-api/api/project/";
-      return  this.apiUrl + "/hopsworks-api/api/project/";
-//      return  "http://" + InetAddress.getByName(getHost()).getHostAddress() + ":" + getPort() + "/hopsworks-api/api/project/";
-//    } catch (UnknownHostException ex) {
-//      Logger.getLogger(HopsworksAPIConfig.class.getName()).log(Level.SEVERE, null, ex);
-//    }
-//    return "";
+      return  getApiUrl() + getBaseUrl() + "/project/";
   }
   
   public String getProjectNameUrl() {
       return  getProjectUrl() + "getProjectInfo/" + projectName;
   }
 
+  public String getBaseUrl() {
+    return baseUrl;
+  }
 }
