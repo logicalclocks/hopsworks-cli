@@ -3,7 +3,6 @@ package io.hops.cli.action;
 import io.hops.cli.config.HopsworksAPIConfig;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;

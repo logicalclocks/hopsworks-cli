@@ -1,5 +1,7 @@
 package io.hops.cli.action;
 
+
+import io.hops.cli.action.HopsworksAction;
 import io.hops.cli.config.HopsworksAPIConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -71,7 +73,7 @@ public abstract class JobAction extends HopsworksAction {
         this.jsonResult = jsonResult;
     }
 
-    protected int readJsonRepoonse(CloseableHttpResponse response) throws IOException {
+    protected int readJsonResponse(CloseableHttpResponse response) throws IOException {
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         StringBuilder res = new StringBuilder();
         String line = "";
@@ -98,7 +100,7 @@ public abstract class JobAction extends HopsworksAction {
         HttpGet request = getJobGet("/executions?sort_by=appId:desc&limit=1");
 
         CloseableHttpResponse response = client.execute(request);
-        int status = readJsonRepoonse(response);
+        int status = readJsonResponse(response);
         if (status != 200 && status != 201) {
             client.close();
             if (response != null) {
@@ -112,5 +114,72 @@ public abstract class JobAction extends HopsworksAction {
         response.close();
         return execution.getInt("id");
     }
+
+    public String getJobsOnlyUrl()  throws IOException {
+        return hopsworksAPIConfig.getProjectUrl() + this.getProjectId() + "/jobs/";
+    }
+
+    /**
+     * get user job configuration for spark
+     * @param jobType
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    protected JsonObject inspectJobConfig(String jobType,String path) throws IOException {
+
+        CloseableHttpClient client = getClient();
+        HttpGet request = new HttpGet(getJobsOnlyUrl()+jobType+"/inspection?path="+path);
+        addHeaders(request);
+        CloseableHttpResponse response = client.execute(request);
+        int status = readJsonResponse(response);
+        if (status != 200 && status != 201) {
+            client.close();
+            if (response != null) {
+                response.close();
+            }
+            throw new IOException("Could not inspect job configuration: " + status);
+        }
+
+        return getJsonResult();
+
+    }
+
+    protected int getExecutionById(Integer execId) throws IOException {
+        CloseableHttpClient client = getClient();
+        HttpGet request = getJobGet("/executions/"+execId.toString());
+
+        CloseableHttpResponse response = client.execute(request);
+        int status = readJsonResponse(response);
+        if (status != 200 && status != 201) {
+            client.close();
+            if (response != null) {
+                response.close();
+            }
+            throw new IOException("Could not get execution id: " + execId +" ; Status :"+status);
+        }
+
+        client.close();
+        response.close();
+        return status;
+    }
+
+    /**
+     * check if job name exists
+     * @return true if found
+     * @throws IOException
+     */
+    public boolean getJobExists() throws IOException {
+        CloseableHttpClient getClient = getClient();
+        HttpGet request = getJobGet("");
+        CloseableHttpResponse response = getClient.execute(request);
+        int statusCode = readJsonResponse(response);
+        if(statusCode == 404)
+             return false;
+
+        return true;
+    }
+
+
 
 }
