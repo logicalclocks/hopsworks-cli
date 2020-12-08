@@ -344,7 +344,9 @@ public class JobCreateAction extends JobAction {
       }
       //add user job config
       objectBuilder.add("appPath", args.getAppPath());
-      objectBuilder.add("mainClass", args.getMainClass());
+      if(!respConfig.containsKey("mainClass")) // add only if inspectJob does not return main class, e.g for pure spark
+        objectBuilder.add("mainClass", args.getMainClass());
+
       objectBuilder.add("defaultArgs",Json.createValue(args.getCommandArgs()));
       objectBuilder.add("amMemory",Json.createValue(args.getDriverMemInMbs()));
       objectBuilder.add("amVCores",Json.createValue(args.getDriverVC()));
