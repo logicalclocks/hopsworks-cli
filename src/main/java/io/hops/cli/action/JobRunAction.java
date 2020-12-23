@@ -34,7 +34,7 @@ public class JobRunAction extends JobAction {
     CloseableHttpResponse response = getClient.execute(request);
     int statusCode = readJsonResponse(response);
     // get execution id after readJsonResponse
-    if (getJsonResult()!=null){
+    if (getJsonResult()!=null && getJsonResult().containsKey("id") ){
       this.execId=getJsonResult().getInt("id");
     }
 
