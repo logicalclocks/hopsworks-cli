@@ -291,6 +291,10 @@ public class JobCreateAction extends JobAction {
   private final HopsworksAPIConfig hopsworksAPIConfig;
   private final String jobName;
 
+  public JobCreateAction(HopsworksAPIConfig hopsworksAPIConfig, String jobName) throws IOException {
+    this(hopsworksAPIConfig, jobName, new Args());
+  }
+  
   public JobCreateAction(HopsworksAPIConfig hopsworksAPIConfig, String jobName, Args args) throws IOException {
 
     super(hopsworksAPIConfig, jobName);
