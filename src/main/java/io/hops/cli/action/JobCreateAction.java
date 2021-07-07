@@ -7,9 +7,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.json.*;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
+
 import static org.apache.http.HttpHeaders.USER_AGENT;
 
 public class JobCreateAction extends JobAction {
@@ -33,10 +37,6 @@ public class JobCreateAction extends JobAction {
     private int gpusPerExecutor = 0;
     private String commandArgs = "";
     private String jvmArgs = "";
-    //old variables
-    /*private String[] files = {};
-    private String[] jars = {};
-    private String[] archives = {};*/
     private String[] sparkConf = {};
     private String files = "";
     private String jars = "";
@@ -151,32 +151,6 @@ public class JobCreateAction extends JobAction {
     public void setJvmArgs(String jvmArgs) {
       this.jvmArgs = jvmArgs;
     }
-
-    //old variables
-/*
-  public String[] getFiles() {
-      return files;
-    }
-
-    public void setFiles(String[] files) {
-      this.files = files;
-    }
-
-    public String[] getJars() {
-      return jars;
-    }
-
-    public void setJars(String[] jars) {
-      this.jars = jars;
-    }
-
-    public String[] getArchives() {
-      return archives;
-    }
-
-    public void setArchives(String[] archives) {
-      this.archives = archives;
-    }*/
 
     public String getFiles() {
       return files;
@@ -320,59 +294,61 @@ public class JobCreateAction extends JobAction {
   public JobCreateAction(HopsworksAPIConfig hopsworksAPIConfig, String jobName) throws IOException {
     this(hopsworksAPIConfig, jobName, new Args());
   }
-
+  
   public JobCreateAction(HopsworksAPIConfig hopsworksAPIConfig, String jobName, Args args) throws IOException {
 
     super(hopsworksAPIConfig, jobName);
     this.hopsworksAPIConfig=hopsworksAPIConfig;
     this.jobName=jobName;
-    String path=args.getAppPath().split("hdfs://")[1];
-
-    payload = getJobConfig(args,path);
+    payload = getJobConfig(args);
 
   }
 
-  private JsonObject getJobConfig(Args args,String programPath) throws IOException {
+  private JsonObject getJobConfig(Args args) throws IOException {
+
     //inspect job config
     JsonObject jobConfig = null;
-    if(args.getJobType().equals(SPARK)){ //inspect spark job config first
-      JsonObject respConfig = inspectJobConfig(args.getJobType().toLowerCase(), programPath);
-
-      JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-      for(String key : respConfig.keySet()) {
+    switch (args.getJobType()) {
+      case SPARK:  //inspect spark job config first
+        JsonObject respConfig = inspectJobConfig(args.getJobType().toLowerCase(), args.appPath);
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        for (String key : respConfig.keySet()) {
           objectBuilder.add(key, respConfig.get(key));
-      }
-      //add user job config
-      objectBuilder.add("appPath", args.getAppPath());
-      if(!respConfig.containsKey("mainClass")) // add only if inspectJob does not return main class, e.g for pure spark
-        objectBuilder.add("mainClass", args.getMainClass());
+        }
+        //add user job config
+        objectBuilder.add("appPath", args.getAppPath());
+        if (!respConfig.containsKey("mainClass")) // add only if inspectJob does not return main class, e.g for pure spark
+          objectBuilder.add("mainClass", args.getMainClass());
 
-      objectBuilder.add("defaultArgs",Json.createValue(args.getCommandArgs()));
-      objectBuilder.add("amMemory",Json.createValue(args.getDriverMemInMbs()));
-      objectBuilder.add("amVCores",Json.createValue(args.getDriverVC()));
-      objectBuilder.add("spark.executor.memory",Json.createValue(args.getExecutorMemInMbs()));
-      objectBuilder.add("spark.executor.cores",Json.createValue(args.getExecutorVC()));
-      objectBuilder.add("spark.dynamicAllocation.enabled",args.isDynamic());
-      objectBuilder.add("spark.executor.instances",Json.createValue(args.getNumExecutors()));
-      if(args.isDynamic()){
-        objectBuilder.add("spark.dynamicAllocation.minExecutors",args.getMinExecutors());
-        objectBuilder.add("spark.dynamicAllocation.maxExecutors",args.getMaxExecutors());
-        objectBuilder.add("spark.dynamicAllocation.initialExecutors",args.getInitExecutors());
-      }
-      if(args.isAdvanceConfig()==true){
-        objectBuilder.add("spark.yarn.dist.archives",args.getArchives());
-        objectBuilder.add("spark.yarn.dist.pyFiles",args.getPythonDependency());
-        objectBuilder.add("spark.yarn.dist.files",args.getFiles());
-        objectBuilder.add("spark.yarn.dist.jars",args.getJars());
-        objectBuilder.add("properties",args.getProperties());
-      }
+        objectBuilder.add("defaultArgs", Json.createValue(args.getCommandArgs()));
+        objectBuilder.add("amMemory", Json.createValue(args.getDriverMemInMbs()));
+        objectBuilder.add("amVCores", Json.createValue(args.getDriverVC()));
+        objectBuilder.add("spark.executor.memory", Json.createValue(args.getExecutorMemInMbs()));
+        objectBuilder.add("spark.executor.cores", Json.createValue(args.getExecutorVC()));
+        objectBuilder.add("spark.dynamicAllocation.enabled", args.isDynamic());
+        objectBuilder.add("spark.executor.instances", Json.createValue(args.getNumExecutors()));
+        if (args.isDynamic()) {
+          objectBuilder.add("spark.dynamicAllocation.minExecutors", args.getMinExecutors());
+          objectBuilder.add("spark.dynamicAllocation.maxExecutors", args.getMaxExecutors());
+          objectBuilder.add("spark.dynamicAllocation.initialExecutors", args.getInitExecutors());
+        }
+        if (args.isAdvanceConfig()) {
+          objectBuilder.add("spark.yarn.dist.archives", args.getArchives());
+          objectBuilder.add("spark.yarn.dist.pyFiles", args.getPythonDependency());
+          objectBuilder.add("spark.yarn.dist.files", args.getFiles());
+          objectBuilder.add("spark.yarn.dist.jars", args.getJars());
+          objectBuilder.add("properties", args.getProperties());
+        }
 
-      jobConfig= objectBuilder.build();
+        jobConfig = objectBuilder.build();
 
-    }else if(args.getJobType().equals(PYTHON)){
-      jobConfig=getPythonJobConfig(args);
-    }else if(args.getJobType().equals(FLINK)){
-      jobConfig=getFlinkJobConfig(args);
+        break;
+      case PYTHON:
+        jobConfig = getPythonJobConfig(args);
+        break;
+      case FLINK:
+        jobConfig = getFlinkJobConfig(args);
+        break;
     }
 
     return jobConfig;

@@ -1,8 +1,8 @@
 package io.hops.cli.action;
 
 
-import io.hops.cli.action.HopsworksAction;
 import io.hops.cli.config.HopsworksAPIConfig;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -76,7 +76,7 @@ public abstract class JobAction extends HopsworksAction {
     protected int readJsonResponse(CloseableHttpResponse response) throws IOException {
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         StringBuilder res = new StringBuilder();
-        String line = "";
+        String line;
         while ((line = rd.readLine()) != null) {
             res.append(line);
         }
@@ -101,15 +101,16 @@ public abstract class JobAction extends HopsworksAction {
 
         CloseableHttpResponse response = client.execute(request);
         int status = readJsonResponse(response);
-        if (status != 200 && status != 201) {
+        if (status != HttpStatus.SC_OK && status != HttpStatus.SC_CREATED) {
             client.close();
-            if (response != null) {
-                response.close();
-            }
             throw new IOException("Could not get latest execution: " + status);
         }
-        JsonArray array = this.getJsonResult().getJsonArray("items");
-        JsonObject execution = array.getJsonObject(0);
+
+        JsonArray resultArray = this.getJsonResult().getJsonArray("items");
+        if (resultArray==null){
+                return 0;
+        }
+        JsonObject execution = resultArray.getJsonObject(0);
         client.close();
         response.close();
         return execution.getInt("id");
@@ -127,17 +128,14 @@ public abstract class JobAction extends HopsworksAction {
      * @throws IOException
      */
     protected JsonObject inspectJobConfig(String jobType,String path) throws IOException {
-
+        path=path.split("hdfs://")[1];
         CloseableHttpClient client = getClient();
         HttpGet request = new HttpGet(getJobsOnlyUrl()+jobType+"/inspection?path="+path);
         addHeaders(request);
         CloseableHttpResponse response = client.execute(request);
         int status = readJsonResponse(response);
-        if (status != 200 && status != 201) {
+        if (status != HttpStatus.SC_OK && status != HttpStatus.SC_CREATED) {
             client.close();
-            if (response != null) {
-                response.close();
-            }
             throw new IOException("Could not inspect job configuration: " + status);
         }
 
@@ -151,11 +149,8 @@ public abstract class JobAction extends HopsworksAction {
 
         CloseableHttpResponse response = client.execute(request);
         int status = readJsonResponse(response);
-        if (status != 200 && status != 201) {
+        if (status != HttpStatus.SC_OK && status != HttpStatus.SC_CREATED) {
             client.close();
-            if (response != null) {
-                response.close();
-            }
             throw new IOException("Could not get execution id: " + execId +" ; Status :"+status);
         }
 
@@ -174,10 +169,7 @@ public abstract class JobAction extends HopsworksAction {
         HttpGet request = getJobGet("");
         CloseableHttpResponse response = getClient.execute(request);
         int statusCode = readJsonResponse(response);
-        if(statusCode == 404)
-             return false;
-
-        return true;
+        return statusCode != HttpStatus.SC_NOT_FOUND;
     }
 
 
