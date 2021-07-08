@@ -17,8 +17,11 @@ import javax.json.JsonArray;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class SubmitFlinkJob extends JobAction {
@@ -59,12 +62,12 @@ public class SubmitFlinkJob extends JobAction {
         this.mainClass = mainClass;
     }
 
-    public String getUserArgs() {
+    private String getUserArgs() {
         return userArgs;
     }
 
-    public void setUserArgs(String userArgs) {
-        this.userArgs = userArgs;
+    public void setUserArgs(String userArgs) throws UnsupportedEncodingException {
+        this.userArgs = URLEncoder.encode(userArgs, "utf8");
     }
 
     private void initPath(String filePath) throws URISyntaxException {
