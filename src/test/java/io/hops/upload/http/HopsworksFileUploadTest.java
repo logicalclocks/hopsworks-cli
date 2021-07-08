@@ -3,10 +3,12 @@ package io.hops.upload.http;
 import io.hops.cli.config.HopsworksAPIConfig;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class HopsworksFileUploadTest {
 
   String projectId;

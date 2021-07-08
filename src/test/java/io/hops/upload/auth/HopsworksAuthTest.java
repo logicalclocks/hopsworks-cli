@@ -2,7 +2,9 @@ package io.hops.upload.auth;
 
 import io.hops.cli.config.HopsworksAPIConfig;
 import org.junit.Before;
+import org.junit.Ignore;
 
+@Ignore
 public class HopsworksAuthTest {
 
    HopsworksAPIConfig hopsworksAPIConfig;
