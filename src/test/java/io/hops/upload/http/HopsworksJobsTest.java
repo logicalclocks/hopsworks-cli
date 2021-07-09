@@ -5,6 +5,7 @@ import io.hops.cli.action.JobRunAction;
 import io.hops.cli.action.JobStopAction;
 import io.hops.cli.config.HopsworksAPIConfig;
 import org.apache.http.HttpStatus;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.json.Json;
@@ -13,7 +14,7 @@ import javax.json.JsonReader;
 import java.io.StringReader;
 
 import static org.junit.Assert.assertEquals;
-
+@Ignore
 public class HopsworksJobsTest {
   private String apiKey = "....";
   private String apiEndpoint = "http://localhost"; //test server

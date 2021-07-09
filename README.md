@@ -1,5 +1,3 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cz.jirutka.rsql/rsql-parser/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.hops/hopsworks-cli)
-
 # Hopsworks CLI
 
 A command-line client, written in Java, that uses the Hopsworks REST API for Job execution and file uploading.
@@ -9,8 +7,20 @@ A command-line client, written in Java, that uses the Hopsworks REST API for Job
     <dependency>
       <groupId>io.hops</groupId>
       <artifactId>hopsworks-cli</artifactId>
-      <version>0.1</version>
+      <version>2.2.1</version>
     </dependency>
+
+## Maven deployment
+
+The repository used is on Archiva `https://archiva.hops.works/` and published using `mvn deploy`. Credentials for the archiva repository need to be added in the `settings.xml` file for maven.
+
+    <servers>
+        <server>
+          <id>repository</id>
+          <username>user</username>
+          <password>pass</password>
+        </server>
+      </servers>
 
 ## Configuration
 
