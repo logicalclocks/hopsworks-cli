@@ -67,8 +67,7 @@ var projectUseCmd = &cobra.Command{
 			return err
 		}
 
-		cfg.Project = project.ProjectName
-		cfg.ProjectID = project.ProjectID
+		applyProject(project)
 
 		// Resolve feature store ID
 		if err := resolveFeatureStoreID(c); err != nil {

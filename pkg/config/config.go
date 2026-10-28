@@ -11,13 +11,17 @@ import (
 )
 
 type Config struct {
-	Host           string `yaml:"host"`
-	APIKey         string `yaml:"api_key"`
-	JWTToken       string `yaml:"-"` // Never persisted, loaded from env/file
-	Project        string `yaml:"project"`
-	ProjectID      int    `yaml:"project_id"`
-	FeatureStoreID int    `yaml:"feature_store_id"`
-	Internal       bool   `yaml:"-"` // Auto-detected, never persisted
+	Host      string `yaml:"host"`
+	APIKey    string `yaml:"api_key"`
+	JWTToken  string `yaml:"-"` // Never persisted, loaded from env/file
+	Project   string `yaml:"project"`
+	ProjectID int    `yaml:"project_id"`
+	// Server-provided identifiers, optional: older backends omit them.
+	ProjectBackingName      string `yaml:"project_backing_name,omitempty"`
+	ProjectHDFSPath         string `yaml:"project_hdfs_path,omitempty"`
+	OfflineFeaturestoreName string `yaml:"offline_featurestore_name,omitempty"`
+	FeatureStoreID          int    `yaml:"feature_store_id"`
+	Internal                bool   `yaml:"-"` // Auto-detected, never persisted
 }
 
 func ConfigDir() string {
@@ -40,6 +44,9 @@ func Load() (*Config, error) {
 		if project := os.Getenv("PROJECT_NAME"); project != "" {
 			cfg.Project = project
 		}
+		if backing := os.Getenv("HOPSWORKS_PROJECT_BACKING_NAME"); backing != "" {
+			cfg.ProjectBackingName = backing
+		}
 		if projectID := os.Getenv("HOPSWORKS_PROJECT_ID"); projectID != "" {
 			if id, err := strconv.Atoi(projectID); err == nil {
 				cfg.ProjectID = id
@@ -60,6 +67,9 @@ func Load() (*Config, error) {
 		}
 		if project := os.Getenv("PROJECT_NAME"); project != "" {
 			cfg.Project = project
+		}
+		if backing := os.Getenv("HOPSWORKS_PROJECT_BACKING_NAME"); backing != "" {
+			cfg.ProjectBackingName = backing
 		}
 		if projectID := os.Getenv("HOPSWORKS_PROJECT_ID"); projectID != "" {
 			if id, err := strconv.Atoi(projectID); err == nil {
@@ -88,10 +98,35 @@ func Load() (*Config, error) {
 			if cfg.FeatureStoreID == 0 {
 				cfg.FeatureStoreID = fileCfg.FeatureStoreID
 			}
+			if sameProject(cfg, &fileCfg) {
+				if cfg.ProjectBackingName == "" {
+					cfg.ProjectBackingName = fileCfg.ProjectBackingName
+				}
+				cfg.ProjectHDFSPath = fileCfg.ProjectHDFSPath
+				cfg.OfflineFeaturestoreName = fileCfg.OfflineFeaturestoreName
+			}
 		}
 	}
 
 	return cfg, nil
+}
+
+// sameProject says whether the identifiers saved in saved belong to the project
+// cfg selects: same host, same name and same project id. Display names repeat
+// across hosts and after a delete and re-create.
+func sameProject(cfg, saved *Config) bool {
+	if cfg.Host != saved.Host || cfg.Project != saved.Project || cfg.ProjectID == 0 || cfg.ProjectID != saved.ProjectID {
+		return false
+	}
+	return cfg.ProjectBackingName == "" || saved.ProjectBackingName == "" || cfg.ProjectBackingName == saved.ProjectBackingName
+}
+
+// ClearProjectIdentifiers drops the server-provided identifiers, for when the
+// selected host or project changes after Load.
+func (c *Config) ClearProjectIdentifiers() {
+	c.ProjectBackingName = ""
+	c.ProjectHDFSPath = ""
+	c.OfflineFeaturestoreName = ""
 }
 
 func (c *Config) Save() error {
@@ -120,4 +155,38 @@ func (c *Config) Mode() string {
 		return "internal"
 	}
 	return "external"
+}
+
+// BackingName is the project's backing identifier (HDFS dir, database prefix).
+// It falls back to the display name when the server does not provide one.
+func (c *Config) BackingName() string {
+	if c.ProjectBackingName != "" {
+		return c.ProjectBackingName
+	}
+	return c.Project
+}
+
+// RootPath is the project's HopsFS root, with a trailing slash.
+func (c *Config) RootPath() string {
+	if c.ProjectHDFSPath != "" {
+		return strings.TrimRight(c.ProjectHDFSPath, "/") + "/"
+	}
+	return "/Projects/" + c.BackingName() + "/"
+}
+
+// ModelPath is the HopsFS path of a model. serverPath is the model's
+// modelPath field, empty on older backends.
+func (c *Config) ModelPath(serverPath, name string) string {
+	if serverPath != "" {
+		return strings.TrimRight(serverPath, "/")
+	}
+	return c.RootPath() + "Models/" + name
+}
+
+// FeatureStoreName is the project's default (offline) feature store database.
+func (c *Config) FeatureStoreName() string {
+	if c.OfflineFeaturestoreName != "" {
+		return c.OfflineFeaturestoreName
+	}
+	return strings.ToLower(c.BackingName()) + "_featurestore"
 }
