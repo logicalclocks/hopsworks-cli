@@ -10,6 +10,10 @@ type Project struct {
 	ProjectName string `json:"projectName"`
 	Description string `json:"description,omitempty"`
 	Created     string `json:"created,omitempty"`
+
+	BackingName             string `json:"backingName,omitempty"`
+	HDFSPath                string `json:"hdfsPath,omitempty"`
+	OfflineFeaturestoreName string `json:"offlineFeaturestoreName,omitempty"`
 }
 
 // projectWrapper handles the nested {"project": {...}} response format
@@ -19,6 +23,10 @@ type projectWrapper struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
 		Created     string `json:"created"`
+
+		BackingName             string `json:"backingName"`
+		HDFSPath                string `json:"hdfsPath"`
+		OfflineFeaturestoreName string `json:"offlineFeaturestoreName"`
 	} `json:"project"`
 }
 
@@ -38,6 +46,10 @@ func (c *Client) ListProjects() ([]Project, error) {
 				ProjectName: w.Project.Name,
 				Description: w.Project.Description,
 				Created:     w.Project.Created,
+
+				BackingName:             w.Project.BackingName,
+				HDFSPath:                w.Project.HDFSPath,
+				OfflineFeaturestoreName: w.Project.OfflineFeaturestoreName,
 			})
 		}
 		return projects, nil
@@ -65,6 +77,10 @@ func (c *Client) GetProject(id int) (*Project, error) {
 			ProjectName: w.Project.Name,
 			Description: w.Project.Description,
 			Created:     w.Project.Created,
+
+			BackingName:             w.Project.BackingName,
+			HDFSPath:                w.Project.HDFSPath,
+			OfflineFeaturestoreName: w.Project.OfflineFeaturestoreName,
 		}, nil
 	}
 

@@ -69,16 +69,14 @@ func loginRun(cmd *cobra.Command, args []string) error {
 	// Project selection
 	if cfg.Project == "" && len(projects) > 0 {
 		if len(projects) == 1 {
-			cfg.Project = projects[0].ProjectName
-			cfg.ProjectID = projects[0].ProjectID
+			applyProject(&projects[0])
 			output.Success("Auto-selected project: %s", cfg.Project)
 		} else {
 			selected, err := promptProject(reader, projects)
 			if err != nil {
 				return err
 			}
-			cfg.Project = selected.ProjectName
-			cfg.ProjectID = selected.ProjectID
+			applyProject(&selected)
 			output.Success("Selected project: %s", cfg.Project)
 		}
 
@@ -196,6 +194,16 @@ func openBrowser(url string) {
 	cmd.Start()
 }
 
+// applyProject makes p the active project, replacing the server-provided
+// identifiers so none carry over from a previous project.
+func applyProject(p *client.Project) {
+	cfg.Project = p.ProjectName
+	cfg.ProjectID = p.ProjectID
+	cfg.ProjectBackingName = p.BackingName
+	cfg.ProjectHDFSPath = p.HDFSPath
+	cfg.OfflineFeaturestoreName = p.OfflineFeaturestoreName
+}
+
 func resolveFeatureStoreID(c *client.Client) error {
 	data, err := c.Get(fmt.Sprintf("/hopsworks-api/api/project/%d/featurestores", cfg.ProjectID))
 	if err != nil {
@@ -209,7 +217,7 @@ func resolveFeatureStoreID(c *client.Client) error {
 		return err
 	}
 	for _, s := range stores {
-		if strings.Contains(s.Name, cfg.Project) || len(stores) == 1 {
+		if strings.EqualFold(s.Name, cfg.FeatureStoreName()) || strings.Contains(s.Name, cfg.BackingName()) || len(stores) == 1 {
 			cfg.FeatureStoreID = s.FeaturestoreId
 			return nil
 		}

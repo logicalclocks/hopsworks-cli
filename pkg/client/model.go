@@ -15,6 +15,7 @@ type Model struct {
 	Metrics     map[string]float64 `json:"metrics,omitempty"`
 	ProjectName string             `json:"projectName,omitempty"`
 	UserFullName string            `json:"userFullName,omitempty"`
+	ModelPath    string            `json:"modelPath,omitempty"`
 }
 
 type ModelList struct {

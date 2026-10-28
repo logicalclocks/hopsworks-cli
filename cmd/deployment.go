@@ -157,8 +157,8 @@ Examples:
 		// Resolve predictor script path (relative to model version Files dir)
 		predictorPath := deployScript
 		if predictorPath != "" && !strings.HasPrefix(predictorPath, "/") {
-			predictorPath = fmt.Sprintf("/Projects/%s/Models/%s/%d/Files/%s",
-				c.Config.Project, m.Name, m.Version, deployScript)
+			predictorPath = fmt.Sprintf("%s/%d/Files/%s",
+				c.Config.ModelPath(m.ModelPath, m.Name), m.Version, deployScript)
 		}
 
 		req := &client.DeploymentCreateRequest{
@@ -166,7 +166,7 @@ Examples:
 			ModelServer:        modelServer,
 			ServingTool:        "KSERVE",
 			ModelName:          m.Name,
-			ModelPath:          fmt.Sprintf("/Projects/%s/Models/%s", c.Config.Project, m.Name),
+			ModelPath:          c.Config.ModelPath(m.ModelPath, m.Name),
 			ModelVersion:       m.Version,
 			ModelFramework:     framework,
 			Predictor:          predictorPath,

@@ -104,7 +104,7 @@ func (c *Client) CreateFeatureView(name string, version int, description string,
 		req["description"] = description
 	}
 
-	fsName := c.Config.Project + "_featurestore"
+	fsName := c.Config.FeatureStoreName()
 
 	// Build base query
 	query := map[string]interface{}{
