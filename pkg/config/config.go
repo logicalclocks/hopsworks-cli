@@ -98,8 +98,7 @@ func Load() (*Config, error) {
 			if cfg.FeatureStoreID == 0 {
 				cfg.FeatureStoreID = fileCfg.FeatureStoreID
 			}
-			// Backing identifiers belong to the project they were saved with.
-			if cfg.Project == fileCfg.Project {
+			if sameProject(cfg, &fileCfg) {
 				if cfg.ProjectBackingName == "" {
 					cfg.ProjectBackingName = fileCfg.ProjectBackingName
 				}
@@ -110,6 +109,24 @@ func Load() (*Config, error) {
 	}
 
 	return cfg, nil
+}
+
+// sameProject says whether the identifiers saved in saved belong to the project
+// cfg selects: same host, same name and same project id. Display names repeat
+// across hosts and after a delete and re-create.
+func sameProject(cfg, saved *Config) bool {
+	if cfg.Host != saved.Host || cfg.Project != saved.Project || cfg.ProjectID == 0 || cfg.ProjectID != saved.ProjectID {
+		return false
+	}
+	return cfg.ProjectBackingName == "" || saved.ProjectBackingName == "" || cfg.ProjectBackingName == saved.ProjectBackingName
+}
+
+// ClearProjectIdentifiers drops the server-provided identifiers, for when the
+// selected host or project changes after Load.
+func (c *Config) ClearProjectIdentifiers() {
+	c.ProjectBackingName = ""
+	c.ProjectHDFSPath = ""
+	c.OfflineFeaturestoreName = ""
 }
 
 func (c *Config) Save() error {

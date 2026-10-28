@@ -40,6 +40,9 @@ Run 'hops init' to set up Claude Code integration.`,
 		}
 
 		// CLI flags override config/env
+		if (flagHost != "" && flagHost != cfg.Host) || (flagProject != "" && flagProject != cfg.Project) {
+			cfg.ClearProjectIdentifiers()
+		}
 		if flagHost != "" {
 			cfg.Host = flagHost
 		}
